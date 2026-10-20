@@ -59,3 +59,21 @@ export const EmptyStateSingleColumn: Story = {
     </div>
   ),
 }
+
+/** The greeting's form: rows between hairlines, under the composer. */
+export const EmptyStateList: Story = {
+  render: () => (
+    <div className="max-w-3xl">
+      <SuggestedQuestions suggestions={suggestions} onPick={fn()} layout="list" />
+    </div>
+  ),
+}
+
+/** The list at widget width: the question and its arrow, no reason. */
+export const EmptyStateListCompact: Story = {
+  render: () => (
+    <div className="max-w-[360px]">
+      <SuggestedQuestions suggestions={suggestions} onPick={fn()} layout="list" compact limit={3} />
+    </div>
+  ),
+}

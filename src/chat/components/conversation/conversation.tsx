@@ -39,8 +39,11 @@ export function Conversation({
   showActions = true,
 }: ConversationProps) {
   const dockRef = useRef<QueueDockHandle>(null)
-  const { containerRef, contentRef, atBottom, scrollToBottom } = useStickToBottom()
   const inChat = messages.length > 0
+  // The greeting reads from the top; following only starts with the chat.
+  const { containerRef, contentRef, atBottom, scrollToBottom } = useStickToBottom({
+    enabled: inChat,
+  })
   // Only the newest turn offers follow-ups, so branches don't stack up the thread.
   const lastId = messages[messages.length - 1]?.id
   // The discoverability tip belongs on the first answer that actually has
@@ -84,7 +87,7 @@ export function Conversation({
         }
       }}
       onArrowUp={() => dockRef.current?.focusLast()}
-      // The empty state lays today's suggestions out above the composer, so
+      // The empty state lays today's suggestions out under the composer, so
       // the sparkle menu and the queue only arrive once the chat has begun.
       suggestions={docked && suggestOn ? suggestions : undefined}
       typeaheadPool={typeaheadPool}
@@ -139,12 +142,15 @@ export function Conversation({
                 ))}
               </div>
             ) : (
-              /* my-auto centers when there is room, without clipping on short viewports */
+              /* my-auto centers when there is room, without clipping on short viewports.
+                 The order is the order of intent: who is asking, the question
+                 box straight after, then today's suggestions for anyone who
+                 has not got one yet. */
               <div className="my-auto py-8">
                 {greeting}
-                <div className="mt-9 mb-8 flex flex-col gap-4">
-                  <SuggestedQuestions suggestions={suggestions} onPick={submit} />
+                <div className="mt-8 mb-8 flex flex-col gap-8">
                   {composer(false)}
+                  <SuggestedQuestions suggestions={suggestions} onPick={submit} layout="list" />
                 </div>
               </div>
             )}

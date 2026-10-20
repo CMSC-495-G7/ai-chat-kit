@@ -7,21 +7,23 @@ test.describe('Orb', () => {
     expect(await root.ariaSnapshot()).toBe('')
   })
 
-  test('it is a circle at whatever size the caller gives it', async ({ story }) => {
+  test('it is a square tile, rounded by a third, at whatever size the caller gives it', async ({
+    story,
+  }) => {
     const root = await story.open('primitives-orb--sizes')
-    const sizes = await root.locator('.orb').evaluateAll((nodes) =>
+    const tiles = await root.locator('.orb').evaluateAll((nodes) =>
       nodes.map((node) => {
         const box = node.getBoundingClientRect()
-        return [box.width, box.height]
+        return [box.width, box.height, getComputedStyle(node).borderTopLeftRadius]
       }),
     )
-    expect(sizes).toEqual([
-      [20, 20],
-      [24, 24],
-      [28, 28],
-      [30, 30],
-      [40, 40],
-      [64, 64],
+    expect(tiles).toEqual([
+      [20, 20, '33.333%'],
+      [24, 24, '33.333%'],
+      [28, 28, '33.333%'],
+      [30, 30, '33.333%'],
+      [40, 40, '33.333%'],
+      [64, 64, '33.333%'],
     ])
   })
 

@@ -31,7 +31,7 @@ export type PaletteInput = {
    *  which is how every shipped theme runs — one hue. */
   accent?: string
   /**
-   * The warm note: the orb's blooms, the dark-mode send button and the
+   * The warm note: the canvas's warm glow, the dark-mode send button and the
    * highlight default. Defaults to the shipped ember orange. Pass your brand
    * colour for a single-hue palette with no orange anywhere.
    */

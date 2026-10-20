@@ -28,8 +28,10 @@ import type {
 } from '../../../engine/types'
 import { ChatMessage } from '../../chat-message'
 import { Composer } from '../../composer'
+import { Greeting } from '../../greeting'
 import { QueueDock, QueueDraft, type QueueDockHandle } from '../../queue-dock'
 import { ReferencePanel } from '../../reference-panel'
+import { SuggestedQuestions } from '../../suggestions'
 
 /** Host-provided profile shown in the header and greeting. */
 export type WidgetProfile = { name: string; loginId?: string }
@@ -43,7 +45,8 @@ type WidgetPanelProps = {
    *  for suggest-as-you-type to match. */
   suggestions?: Suggestion[]
   typeaheadPool?: Suggestion[]
-  /** Suggested prompts shown on the empty greeting screen. */
+  /** Suggested prompts shown on the empty greeting screen. With none, the
+   *  greeting lists the first three of today's `suggestions` instead. */
   starters: string[]
   /** Host-provided user profile (name / login). */
   profile: WidgetProfile
@@ -118,8 +121,11 @@ export function WidgetPanel({
 }: WidgetPanelProps) {
   const { appName, disclaimer } = useBranding()
   const dockRef = useRef<QueueDockHandle>(null)
-  const { containerRef, contentRef, atBottom, scrollToBottom } = useStickToBottom()
   const inChat = messages.length > 0
+  // The greeting reads from the top; following only starts with the chat.
+  const { containerRef, contentRef, atBottom, scrollToBottom } = useStickToBottom({
+    enabled: inChat,
+  })
   // Only the newest turn offers follow-ups, so branches don't stack up the thread.
   const lastId = messages[messages.length - 1]?.id
   // The discoverability tip belongs on the first answer that actually has
@@ -150,6 +156,15 @@ export function WidgetPanel({
 
   const queueOn = features.queue !== false
   const suggestOn = features.suggestions !== false
+  // What the empty greeting offers: the host's starters when it has chosen
+  // some, otherwise today's suggestions — the same list the full app shows
+  // under its greeting. Three is what fits above the composer at panel size.
+  const openers: Suggestion[] =
+    starters.length > 0
+      ? starters.map((text) => ({ text }))
+      : suggestOn
+        ? (suggestions ?? []).slice(0, 3)
+        : []
   // Running a chain puts its first question on screen, so bring it into view.
   const chainControls = useMemo<ChainControls>(
     () => ({
@@ -173,7 +188,7 @@ export function WidgetPanel({
   return (
     <>
       <header className="flex items-center gap-2.5 border-b border-line px-4 py-3">
-        <Orb className="orb block size-6 shrink-0 rounded-full" aria-hidden />
+        <Orb className="orb block size-6 shrink-0" aria-hidden />
         <div className="flex min-w-0 flex-col">
           <span className="text-sm leading-tight font-semibold text-ink-strong">{appName}</span>
           {name && (
@@ -239,27 +254,18 @@ export function WidgetPanel({
                     ))}
                   </div>
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-                    <Orb className="orb block size-12 rounded-full animate-orb-drift" aria-hidden />
-                    <p className="mt-3 text-base font-semibold text-ink-strong">
-                      {firstName ? `Hi, ${firstName}` : `Hi, I'm ${appName}`}
-                    </p>
-                    <p className="text-sm text-ink-soft">
-                      {firstName ? `I'm ${appName} — how can I help?` : `Ask ${appName} anything.`}
-                    </p>
-                    {loginId && <p className="text-xs text-ink-soft/70">Signed in as {loginId}</p>}
-                    <div className="mt-4 flex flex-col items-stretch gap-2 self-stretch px-2">
-                      {starters.map((prompt) => (
-                        <button
-                          key={prompt}
-                          type="button"
-                          onClick={() => submit(prompt)}
-                          className="glass rounded-control px-4 py-2 text-xs font-semibold text-ink transition hover:border-accent/50 hover:text-ink-strong"
-                        >
-                          {prompt}
-                        </button>
-                      ))}
-                    </div>
+                  /* The full app's greeting at panel size. The header above
+                     already carries the mark, the app name and who is signed
+                     in, so the greeting keeps only the date and the headline. */
+                  <div className="flex flex-col gap-6 px-0.5 pt-3">
+                    <Greeting compact name={firstName || undefined} />
+                    <SuggestedQuestions
+                      suggestions={openers}
+                      onPick={submit}
+                      limit={openers.length}
+                      layout="list"
+                      compact
+                    />
                   </div>
                 )}
               </div>

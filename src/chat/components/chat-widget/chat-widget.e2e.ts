@@ -7,7 +7,10 @@ test.describe('ChatWidget', () => {
     await page.getByRole('button', { name: 'Ask Assistant' }).click()
     const panel = page.getByRole('dialog', { name: 'Assistant chat' })
     await expect(panel.getByRole('textbox', { name: 'Message Assistant' })).toBeVisible()
-    await expect(panel).toContainText('Hi, Dana')
+    // The page's h1 belongs to the host, so the panel's greeting is an h2.
+    await expect(
+      panel.getByRole('heading', { level: 2, name: /What are we working on\?/ }),
+    ).toContainText(', Dana.')
   })
 
   test('the panel header names the person signed in and offers the three window controls', async ({

@@ -37,6 +37,14 @@ export type SuggestedQuestionsProps = {
   onPick: (text: string) => void
   /** How many to show, best first. Four fills the two-column grid evenly. */
   limit?: number
-  /** One column instead of two. */
+  /** One column instead of two, and smaller type. */
   compact?: boolean
+  /**
+   * `grid`: cards, two to a row. `list`: full-width rows between hairlines,
+   * each with its reason and an arrow — the quieter form the greeting uses,
+   * under the composer rather than above it. In a compact list, and on a
+   * phone, the reason is left out; a narrow row has no room for it beside the
+   * question.
+   */
+  layout?: 'grid' | 'list'
 }

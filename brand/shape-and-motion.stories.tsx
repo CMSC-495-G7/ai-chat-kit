@@ -90,11 +90,11 @@ export const Elevation: Story = {
 export const Surfaces: Story = {
   render: () => (
     <section className="flex flex-col gap-3">
-      <h2 className="text-base font-bold text-ink-strong">Glass and the orb</h2>
+      <h2 className="text-base font-bold text-ink-strong">Glass and the mark</h2>
       <p className="max-w-3xl text-[13px] leading-5 text-ink-soft">
         `.glass` is a translucent panel that blurs what is behind it; it sits over the ambient glow
-        that washes in from two corners of a page. `.orb` is the logo mark, drawn entirely in CSS
-        from the palette, so it re-colours with the brand.
+        that washes in from two corners of a page. `.orb` is the logo mark: a white face on a
+        rounded tile of the brand colour, so it re-colours with the palette.
       </p>
       <div
         className="relative flex min-h-72 items-center gap-8 overflow-hidden rounded-surface border border-line bg-canvas p-8"
@@ -113,7 +113,7 @@ export const Surfaces: Story = {
           {[20, 30, 44, 64].map((size) => (
             <span
               key={size}
-              className="orb block shrink-0 rounded-full"
+              className="orb block shrink-0"
               style={{ width: size, height: size }}
               aria-hidden
             />
@@ -129,14 +129,24 @@ export const Motion: Story = {
     <section className="flex flex-col gap-3">
       <h2 className="text-base font-bold text-ink-strong">Motion</h2>
       <p className="max-w-3xl text-[13px] leading-5 text-ink-soft">
-        Three animations, shared by every palette. With reduced motion switched on in the operating
-        system, all of them collapse to nothing.
+        Five animations, shared by every palette. With reduced motion switched on in the operating
+        system, all of them collapse to nothing and the face rests.
       </p>
-      <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
+      <div className="grid grid-cols-5 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1">
         <div className="flex flex-col items-start gap-3 rounded-surface border border-line bg-panel-solid p-5">
-          <span className="orb block size-11 animate-orb-drift rounded-full" aria-hidden />
+          <span className="orb block size-11 animate-orb-drift" aria-hidden />
           <code className="text-[11.5px] text-ink-strong">animate-orb-drift</code>
-          <span className="text-[11.5px] text-ink-soft">The orb, while the page is idle</span>
+          <span className="text-[11.5px] text-ink-soft">The mark, while the page is idle</span>
+        </div>
+        <div className="flex flex-col items-start gap-3 rounded-surface border border-line bg-panel-solid p-5">
+          <span className="orb block size-11 animate-orb-think" aria-hidden />
+          <code className="text-[11.5px] text-ink-strong">animate-orb-think</code>
+          <span className="text-[11.5px] text-ink-soft">Drifts and blinks while it reasons</span>
+        </div>
+        <div className="flex flex-col items-start gap-3 rounded-surface border border-line bg-panel-solid p-5">
+          <span className="orb block size-11 animate-orb-talk" aria-hidden />
+          <code className="text-[11.5px] text-ink-strong">animate-orb-talk</code>
+          <span className="text-[11.5px] text-ink-soft">Talks while the answer streams</span>
         </div>
         <div className="flex flex-col items-start gap-3 rounded-surface border border-line bg-panel-solid p-5">
           <span className="animate-fade-up rounded-control bg-chip px-3 py-2 text-[13px] font-bold text-chip-fg">
