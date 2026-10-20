@@ -1,0 +1,39 @@
+{
+  // Typechecks everything: the library, every story, and the Storybook config.
+  // tsconfig.lib.json is the stricter second pass over the library alone.
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    // `?inline` CSS imports (the widget's shadow sheet) only typecheck with
+    // Vite's types. `node` is for the Storybook and Vite configs.
+    "types": ["vite/client", "node"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  // The sources are listed, not just reached through imports:
+  // react-docgen-typescript only reads props from files the project names.
+  "include": [
+    "src",
+    "brand",
+    "tests",
+    ".storybook",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "vitest.config.ts"
+  ]
+}

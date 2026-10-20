@@ -1,0 +1,95 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Docs/Configuration" />
+
+# Consumer configuration
+
+The generic library has 48 primitive modules and 10 component modules. Their
+renderers and public types were reviewed for fixed application data, UI copy,
+visibility, persistence, and behavior limits. Application records, selections,
+fetches, destinations, tenant choices, and settings catalogues come from the
+host. Stories and fixtures can contain concrete sample values.
+
+English text is a default. A caller can replace strings, accessible names, and
+count-aware wording through each component's props. Native-attribute primitives
+such as Breadcrumbs also accept `aria-label` directly. New label overrides are
+optional; callers can keep using the existing defaults.
+
+## Facet filters
+
+`showUnavailableToggle={false}` hides “Hide unavailable”. It does not hide
+zero-count options by itself. Add `defaultShowUnavailable={false}` to hide those
+rows initially. Selected values remain removable even when their count is zero.
+Individual groups can override both defaults.
+
+Other optional chrome uses `showSearch`, `showActiveFilters`, `showTotal`, `showCounts`,
+`showReset`, `showClearAll`, `showSelectAll`, `showSelectionHints`, `showLoadAll`,
+and `showLoadHint`. Per-group search uses `group.searchable`. Custom entry,
+scope, and the dismiss footer depend on their corresponding data/callback props.
+
+`layout` replaces density defaults for preview rows, viewport rows, open groups,
+and visible chips. `chipOptions` sets the summary threshold, per-group preview,
+expanded budget, and reserved region height. Keep chip budgets small for large
+selections; these limits affect rendering, not selection data. Lookup debounce
+uses `searchDebounceMs`. Bulk selection uses `selectAllCap`.
+
+All facet helper text has an override in `labels`, including formatter functions
+for counts and group names. For example:
+
+```tsx
+<FacetFilters
+  groups={groups}
+  selection={selection}
+  onSelectionChange={setSelection}
+  showUnavailableToggle={false}
+  defaultShowUnavailable={false}
+  labels={{ itemsInScope: (n) => `${n.toLocaleString()} matching records` }}
+/>
+```
+
+The component does not infer record totals from option counts. The host supplies
+`total`. It also owns loading cost estimates through `loadAllWarning`; the library
+does not assume every option costs a fixed number of bytes.
+
+See the component's props JSDoc and stories for local/remote data flow,
+predicates, stable rows, chip limits, and keyboard navigation.
+
+## Other configurable defaults
+
+| Surface                        | Host configuration                                                                                                                                                                                                      |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ThemeToggle                    | Controlled `dark` / `onDarkChange`, `storageKey` (null disables storage), `applyToDocument`, labels, and native button attributes. Align a custom storage key with the host's theme bootstrap.                          |
+| SearchField / TextInput        | SearchField `fieldSize`; TextInput `size` and `focusRing`. `focusRing="inset"` fits a clipped container. Native input props retain their normal meaning.                                                                |
+| DatePicker / DateField         | Calendar labels and locales; date fields accept calendar props, formatting/parsing functions, custom presets, day-count visibility, and helper labels. Supply a matching parser and formatter for a custom date format. |
+| Card / Accordion / Stepper     | Card action names and `keyboardMoveStep`; accordion `stepLabel`; stepper accessible label and classes.                                                                                                                  |
+| AccountMenu                    | Labels, count/name formatters, and popover widths. Items and callbacks remain host supplied.                                                                                                                            |
+| SideTabPanel / SideDialog      | Navigation and dismissal names; SideDialog preferred width capped to the viewport.                                                                                                                                      |
+| DocumentPreview / MermaidBlock | Loading/error/control labels, loading renderer for documents, diagram label and preview interval. Renderer geometry and sanitization stay internal.                                                                     |
+| ArticlePreview (experimental)  | Labels for the region, heading facts, yes/no and unset values; `formatDate`; `showEmpty`; `zoom`. Field layout and rich text sanitization stay internal.                                                                |
+
+The remaining primitives already take content or native attributes, along with
+relevant size/variant/state defaults: alerts, avatars, buttons, checkboxes,
+choice cards, copy buttons, badges, descriptions, empty states, fields, chips,
+hover cards, icons, tips, links, menus, modals, notices, radio groups, resize
+handles, scroll controls, sections, segmented controls, sliders, statistics,
+switches, tabs, textareas, and tooltips. AmbientGlow, Orb, Pill, Skeleton, and
+StatusDot are visual atoms with their existing visual APIs.
+
+The other components remain data/content driven: ResizableColumn, Settings and
+SlideOver. Their contracts expose content, visibility, bounds, persistence,
+catalogue/options, or placement as appropriate.
+
+## Design and implementation constants
+
+A reusable library still defines a design system. Brand colors, type sizes,
+spacing, icon geometry, control variants, portal collision padding, and renderer
+mechanics remain internal defaults or tokens. Turning every CSS number into a
+prop would obscure useful choices. A fixed 32px facet row is shared by the
+renderer and virtualizer so consumers cannot accidentally make them disagree.
+Loading strategy, visible controls, data limits, labels, and persistence belong
+to the host and have explicit props.
+
+Facet search fields use an inset keyboard outline so overflow containers cannot
+cut off the focus border. SearchField marks its enclosing shell; TextInput can
+use an inset ring. Playwright covers the facet searches in light/dark modes,
+keyboard selection across virtual windows, and the configurable minimal UI.

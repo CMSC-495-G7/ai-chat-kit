@@ -1,0 +1,116 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Brand/Overview" />
+
+# Brand
+
+The brand is CSS, in `brand/`. Every colour in every story resolves through a
+custom property from `brand/brand.css`; nothing in a component names a hex
+value. The pages after this one show the result: **Colour**, **Typography**,
+**Shape and motion**.
+
+| File               | What it holds                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| `brand/brand.css`  | The four palettes, light and dark, the six highlight swatches, and a template for a new palette |
+| `brand/tokens.css` | The bridge to Tailwind names, the radius scale, motion, base styles, and four shared utilities  |
+| `brand/head.html`  | Fonts, and the script that applies mode and palette before first paint so nothing flashes       |
+
+## One class re-skins everything
+
+```html
+<html class="chat-theme-deep dark"></html>
+```
+
+| Toolbar   | Class on `<html>`     | What it changes                                      |
+| --------- | --------------------- | ---------------------------------------------------- |
+| Mode      | `light` / `dark`      | Every semantic token re-derives for the mode         |
+| Palette   | `chat-theme-<id>`     | The identity ramp: canvas, panels, brand fills       |
+| Highlight | `chat-highlight-<id>` | `--highlight`, the `<mark>` behind cited passages    |
+| Density   | _(React context)_     | `UiSizeProvider` — `compact` is what the widget runs |
+
+The palette class and `dark` / `light` must sit on the **same element**:
+`brand.css` derives its light and dark tokens on whichever element carries the
+palette.
+
+### Why `<html>`, not a wrapper
+
+`body` paints `var(--canvas)`, which resolves at `:root`, and `HoverCard`,
+`Tooltip` and `Modal` render through portals into `document.body`. A palette
+class on a wrapper `div` would leave both on the previous palette.
+
+The one exception is the chat widget. `mountWidget` renders into a shadow root
+and takes its palette class as an option, because a host page's classes cannot
+cross the shadow boundary.
+
+## The four palettes
+
+| Palette                                          | Identity                                                              |
+| ------------------------------------------------ | --------------------------------------------------------------------- |
+| `chat-theme-default` (also the no-class default) | `#004c97` blue, `#ef6a00` orange, near-white canvas                   |
+| `chat-theme-classic`                             | The palette the library first shipped with: same blue, lighter orange |
+| `chat-theme-deep`                                | Deep navy, `#084d77` / `#001e33`, same orange                         |
+| `chat-theme-graphite`                            | The default's blue on a near-neutral `#0f1214` charcoal in dark       |
+
+They differ mostly in **dark**. Light is near-identical across `default` and
+`graphite` by design. What separates the dark modes is how much colour the dark
+field carries:
+
+| Palette    | Dark canvas | Chroma  | Reads as                                      |
+| ---------- | ----------- | ------- | --------------------------------------------- |
+| `default`  | `#04172a`   | `0.046` | Navy, but calm enough to sit behind content   |
+| `deep`     | `#001e33`   | `0.054` | Deeper and cooler, pure white headings        |
+| `graphite` | `#0f1214`   | `0.006` | Effectively neutral, the darkest of the three |
+
+## What each colour means
+
+> One blue carries the product. Warmth is spent in a few places, deliberately.
+
+| Token                     | Where it is used                                 | Rule                                                                                                                                     |
+| ------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--brand-solid`           | Every solid brand fill: primary buttons, avatars | The single solid fill. It inverts in dark to a near-white fill with a deep glyph, because no blue clears both contrast bars there.       |
+| `--accent`, `--accent-fg` | Links, focus, selected state                     | Aliased to the brand ramp, so the two cannot drift. As text it steps darker (light) or lighter (dark) to clear 4.5:1.                    |
+| `--action`                | The composer's send button, and only that        | The one saturated control. In dark it becomes the warm hue against a desaturated field.                                                  |
+| `--notify`                | A person is being waited on; an unread count     | Orange means this and nothing else. It is contrast-checked: `--on-notify` is chosen per mode to clear 4.5:1. Never use it as decoration. |
+| `--ember-*`               | The orb's two blooms                             | Decoration only. Never reuse these for text, icons or state.                                                                             |
+| `--highlight`             | The `<mark>` behind a cited passage              | Warm by choice: a highlight marks where to look and must not read as another control. Swappable with a `chat-highlight-*` class.         |
+| `--caution`               | A caveat to weigh, such as a policy exception    | Gold rather than orange, so it is not mistaken for "waiting on a person". Not a failure.                                                 |
+| `--danger`                | A failure, or an action that destroys something  | Reserved for both. A recoverable problem is `--caution`.                                                                                 |
+| `--success`               | Something completed or approved                  | Semantic, not part of the brand ramp.                                                                                                    |
+
+## The token tiers
+
+```css
+/* Tier 1 — per palette, in each .chat-theme-* block */
+--brand-50 … --brand-950      /* identity hue */
+--accent-200 … --accent-700   /* action hue, aliased to brand */
+--font-brand-family
+
+/* Tier 2 — semantic, derived; what components actually use */
+--canvas  --panel  --panel-solid  --line
+--ink-strong  --ink  --ink-soft
+--brand-solid  --brand-fg  --action  --focus-ring  --highlight …
+```
+
+Tailwind sees tier 2 through the `@theme inline` bridge in `tokens.css`, so
+`bg-canvas` compiles to `var(--canvas)` rather than a value pinned at `:root`.
+That `inline` is what lets a `chat-theme-*` class re-theme any subtree,
+including the widget's shadow root.
+
+## Adding a palette
+
+Copy the commented **TEMPLATE** block at the end of `brand.css`, rename
+`.chat-theme-yourbrand`, and fill in the tier-1 values. Every tier-2 token
+derives from them. Then add it to `PALETTES` in `.storybook/preview.tsx` to get
+it on the toolbar, and to `SHIPPED_PALETTES` in
+`src/lib/settings/appearance.ts` if viewers should be able to pick it.
+
+One step is easy to miss: `--accent-500` is every solid accent fill and keeps
+your exact brand value, while `--accent-700` is the accent used as _text_ on
+the canvas. Pick the latter for at least 4.5:1.
+
+## Your own colours
+
+The shipped palettes are hand-tuned classes. For a tenant's own brand, build a
+palette at runtime from a seed colour instead — no stylesheet edit:
+`createPalette({ brand: '#0f766e' })`. See
+[Docs / Theming](?path=/docs/docs-theming--docs) and **Brand / Custom palette**.

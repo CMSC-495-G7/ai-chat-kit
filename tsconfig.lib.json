@@ -1,0 +1,18 @@
+{
+  // The library as an app sees it: no stories, no tests, no Storybook types, and no
+  // Node types. An app compiles this source with its own tsconfig, so a Node
+  // global that slipped into a component would only fail over there.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/**/*.stories.tsx",
+    "src/**/*.e2e.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/recipes/**",
+    "src/**/*.example.tsx"
+  ]
+}

@@ -1,0 +1,314 @@
+/* Accordion — the "parting list".
+
+   Closed items are one joined list; opening one lifts it out as a raised card
+   and the list parts around it: the open item takes a margin and a shadow, and
+   its neighbours round the corners that now face a gap. That is sibling
+   styling — `:has(+ …)` and `… + …` — which is why it lives here and not in
+   utilities on each element.
+
+   In @layer components so a caller's Tailwind utilities (className on any
+   part) still win over these defaults.
+
+   `data-rail` on the root draws the chat's reasoning rail: a node per row, and
+   one line from the open item's node down to the end of its content. The line
+   is drawn on the item, not the trigger, so it stays joined however tall the
+   content grows.
+
+   Reduced motion: the global rule in brand/tokens.css collapses every duration. */
+
+@layer components {
+  .ui-accordion {
+    --acc-radius: var(--radius-surface);
+    --acc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --acc-pad-x: 20px;
+    --acc-pad-y: 15px;
+    --acc-gap: 10px;
+    --acc-lead-gap: 12px;
+    --acc-rail: color-mix(in srgb, var(--brand-fg) 55%, transparent);
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+  .ui-accordion[data-density='compact'] {
+    --acc-pad-x: 14px;
+    --acc-pad-y: 11px;
+    --acc-gap: 8px;
+    --acc-lead-gap: 10px;
+  }
+
+  /* The joined list, and the parting ------------------------------------ */
+
+  .ui-accordion > .ui-accordion__item {
+    /* What sits in front of the title — nothing, a rail node or a step marker.
+       The body indents to line up under the title, and the rail runs
+       through the lead's centre. */
+    --acc-lead: 0px;
+    --acc-indent: 0px;
+    position: relative;
+    margin-top: -1px;
+    border: 1px solid var(--line);
+    background: var(--panel-solid);
+    transition:
+      margin 0.32s var(--acc-ease),
+      border-radius 0.32s var(--acc-ease),
+      box-shadow 0.32s var(--acc-ease),
+      border-color 0.32s;
+  }
+  .ui-accordion[data-rail] > .ui-accordion__item {
+    --acc-lead: 10px;
+    --acc-indent: calc(10px + var(--acc-lead-gap));
+  }
+  .ui-accordion > .ui-accordion__item:has(> .ui-accordion__heading .ui-accordion__marker) {
+    --acc-lead: 22px;
+    --acc-indent: calc(22px + var(--acc-lead-gap));
+  }
+  .ui-accordion > .ui-accordion__item:first-child {
+    margin-top: 0;
+    border-top-left-radius: var(--acc-radius);
+    border-top-right-radius: var(--acc-radius);
+  }
+  .ui-accordion > .ui-accordion__item:last-child {
+    border-bottom-left-radius: var(--acc-radius);
+    border-bottom-right-radius: var(--acc-radius);
+  }
+  .ui-accordion > .ui-accordion__item[data-state='open'] {
+    z-index: 1;
+    margin-block: var(--acc-gap);
+    border-color: color-mix(in srgb, var(--ink-soft) 32%, transparent);
+    border-radius: var(--acc-radius);
+    box-shadow:
+      0 14px 30px -12px var(--shadow-raised),
+      0 2px 6px -2px var(--shadow-soft);
+  }
+  .ui-accordion > .ui-accordion__item[data-state='open']:first-child {
+    margin-top: 0;
+  }
+  .ui-accordion > .ui-accordion__item[data-state='open']:last-child {
+    margin-bottom: 0;
+  }
+  .ui-accordion > .ui-accordion__item[data-state='open'] + .ui-accordion__item {
+    margin-top: 0;
+    border-top-left-radius: var(--acc-radius);
+    border-top-right-radius: var(--acc-radius);
+  }
+  .ui-accordion > .ui-accordion__item:has(+ .ui-accordion__item[data-state='open']) {
+    border-bottom-left-radius: var(--acc-radius);
+    border-bottom-right-radius: var(--acc-radius);
+  }
+
+  /* Header ---------------------------------------------------------------- */
+
+  .ui-accordion__heading {
+    display: flex;
+    margin: 0;
+    border-radius: inherit;
+  }
+  .ui-accordion__item[data-state='open'] > .ui-accordion__heading {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .ui-accordion__trigger {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: var(--acc-lead-gap);
+    padding: var(--acc-pad-y) 18px var(--acc-pad-y) var(--acc-pad-x);
+    border-radius: inherit;
+    background: transparent;
+    color: var(--ink-strong);
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s;
+  }
+  .ui-accordion[data-density='compact'] .ui-accordion__trigger {
+    font-size: 13px;
+  }
+  .ui-accordion__trigger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--tint) 4%, transparent);
+  }
+  /* Inset: the item's neighbours sit flush against it. */
+  .ui-accordion__trigger:focus-visible {
+    outline-offset: -2px;
+  }
+  .ui-accordion__trigger:disabled {
+    color: var(--ink-soft);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .ui-accordion__titlewrap {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+  }
+  .ui-accordion__title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .ui-accordion__item[data-state='open'] .ui-accordion__title {
+    font-weight: 800;
+  }
+  .ui-accordion__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: var(--ink-soft);
+  }
+  .ui-accordion__icon > svg {
+    width: 18px;
+    height: 18px;
+  }
+  /* Fades while the panel opens, then leaves the accessibility tree: the
+     panel says it in full. */
+  .ui-accordion__summary {
+    max-width: 45%;
+    flex: none;
+    overflow: hidden;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition:
+      opacity 0.2s,
+      visibility 0s linear 0s;
+  }
+  .ui-accordion__item[data-state='open'] .ui-accordion__summary {
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 0.2s,
+      visibility 0s linear 0.2s;
+  }
+  .ui-accordion__chevron {
+    flex: none;
+    color: var(--ink-soft);
+    transition: transform 0.3s var(--acc-ease);
+  }
+  .ui-accordion__item[data-state='open'] .ui-accordion__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Step markers ---------------------------------------------------------- */
+
+  .ui-accordion__marker {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    flex: none;
+    box-sizing: border-box;
+    place-items: center;
+    border: 1.5px solid color-mix(in srgb, var(--ink-soft) 45%, transparent);
+    border-radius: 50%;
+    background: var(--panel-solid);
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    transition:
+      background-color 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s,
+      color 0.25s;
+  }
+  [data-status='complete'] > .ui-accordion__marker {
+    border-color: var(--success-line);
+    background: var(--success-surface);
+    color: var(--success-fg);
+  }
+  [data-status='current'] > .ui-accordion__marker {
+    border-color: var(--brand-fg);
+    background: color-mix(in srgb, var(--brand-fg) 16%, var(--panel-solid));
+    color: var(--chip-fg);
+  }
+
+  /* The rail -------------------------------------------------------------- */
+
+  .ui-accordion__node {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    box-sizing: border-box;
+    border: 1.5px solid var(--ink-soft);
+    border-radius: 50%;
+    background: var(--panel-solid);
+    transition:
+      background-color 0.25s,
+      border-color 0.25s,
+      box-shadow 0.25s;
+  }
+  .ui-accordion__item[data-state='open'] .ui-accordion__node {
+    border-color: var(--brand-fg);
+    background: var(--brand-fg);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-fg) 22%, transparent);
+  }
+  .ui-accordion__item[data-disabled] .ui-accordion__node {
+    border-style: dashed;
+  }
+  /* With the rail on, step markers become its nodes: filled, not tinted. */
+  .ui-accordion[data-rail] [data-status='complete'] > .ui-accordion__marker {
+    border-color: var(--brand-fg);
+    background: var(--brand-fg);
+    color: var(--panel-solid);
+  }
+  .ui-accordion[data-rail] [data-status='current'] > .ui-accordion__marker {
+    border-color: var(--brand-solid);
+    background: var(--brand-solid);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-fg) 22%, transparent);
+    color: var(--on-brand-solid);
+  }
+  .ui-accordion[data-rail] > .ui-accordion__item::before {
+    position: absolute;
+    z-index: 0;
+    top: calc(var(--acc-pad-y) + 11px);
+    bottom: 22px;
+    left: calc(var(--acc-pad-x) + var(--acc-lead) / 2);
+    width: 1.5px;
+    background: var(--acc-rail);
+    content: '';
+    transform: translateX(-50%) scaleY(0);
+    transform-origin: top;
+    transition: transform 0.32s var(--acc-ease);
+  }
+  .ui-accordion[data-rail] > .ui-accordion__item[data-state='open']::before {
+    transform: translateX(-50%) scaleY(1);
+  }
+  /* Nodes and markers paint over the line's top end. */
+  .ui-accordion__node,
+  .ui-accordion__marker {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Panel ----------------------------------------------------------------- */
+
+  .ui-accordion__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s var(--acc-ease);
+  }
+  .ui-accordion__item[data-state='open'] > .ui-accordion__panel {
+    grid-template-rows: 1fr;
+  }
+  .ui-accordion__panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .ui-accordion__body {
+    padding: 2px 20px 22px calc(var(--acc-pad-x) + var(--acc-indent));
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .ui-accordion[data-density='compact'] .ui-accordion__body {
+    padding-right: 14px;
+    padding-bottom: 16px;
+    font-size: 12.5px;
+  }
+}

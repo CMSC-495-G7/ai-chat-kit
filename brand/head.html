@@ -1,0 +1,33 @@
+<!--
+  Shared <head> for every app: fonts, and the theme applied before first paint.
+  An app's index.html carries a placeholder comment and its vite.config.ts
+  swaps this file in (`ai-chat-kit/brand/head.html`).
+
+  Inline rather than an imported module on purpose: body paints
+  `var(--canvas)` as soon as the stylesheet lands, and a deferred module runs
+  after that, so the wrong palette or mode would flash first.
+-->
+<meta name="color-scheme" content="light dark" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+  rel="stylesheet"
+/>
+<script>
+  // Apply theme before first paint to avoid a flash of the wrong mode.
+  // Same key as THEME_MODE_KEY in src/primitives/theme-toggle.
+  const stored = localStorage.getItem('chat-theme-mode')
+  const dark = stored ? stored === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+  document.documentElement.classList.toggle('dark', dark)
+  document.documentElement.classList.toggle('light', !dark)
+  // The brand palette goes on this same element. A real app hardcodes one
+  // `chat-theme-*` class here and is done; the demo lets a presenter switch
+  // between them (see the Palette picker in Demo features), so it reads the
+  // stored choice — and does it here rather than in React so a reload does
+  // not flash the default navy before the chosen palette lands.
+  const palette = localStorage.getItem('chat-brand-theme')
+  document.documentElement.classList.add(
+    'chat-theme-' + (['default', 'deep', 'graphite'].includes(palette) ? palette : 'default'),
+  )
+</script>

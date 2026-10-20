@@ -1,0 +1,91 @@
+// ai-chat-kit — the generic tiers: primitives, components, hooks, the
+// settings plumbing and the palette API. Nothing here knows about chat, and
+// nothing here may import from it; chat builds on this, never the reverse. Its
+// own entry point is `ai-chat-kit/chat`.
+
+// Primitives — one control or one visual atom each
+export * from './primitives/accordion'
+export * from './primitives/alert'
+export * from './primitives/ambient-glow'
+export * from './primitives/avatar'
+export * from './primitives/breadcrumbs'
+export * from './primitives/button'
+export * from './primitives/card'
+export * from './primitives/checkbox'
+export * from './primitives/choice-card'
+export * from './primitives/copy-button'
+export * from './primitives/count-badge'
+export * from './primitives/date-field'
+export * from './primitives/date-picker'
+export * from './primitives/description-list'
+export * from './primitives/empty-state'
+export * from './primitives/field'
+export * from './primitives/filter-chip'
+export * from './primitives/hover-card'
+export * from './primitives/icon-button'
+export * from './primitives/icon-tile'
+export * from './primitives/icons'
+export * from './primitives/inline-tip'
+export * from './primitives/kbd'
+export * from './primitives/link'
+export * from './primitives/menu'
+export * from './primitives/modal'
+export * from './primitives/notice'
+export * from './primitives/orb'
+export * from './primitives/pill'
+export * from './primitives/pill-list'
+export * from './primitives/popover'
+export * from './primitives/radio-group'
+export * from './primitives/resize-handle'
+export * from './primitives/scroll-to-bottom-button'
+export * from './primitives/search-field'
+export * from './primitives/section-label'
+export * from './primitives/segmented-control'
+export * from './primitives/select'
+export * from './primitives/skeleton'
+export * from './primitives/slider'
+export * from './primitives/stat-tile'
+export * from './primitives/status-dot'
+export * from './primitives/stepper'
+export * from './primitives/switch'
+export * from './primitives/tabs'
+export * from './primitives/text-input'
+export * from './primitives/textarea'
+export * from './primitives/theme-toggle'
+export * from './primitives/tooltip'
+
+// Components — primitives assembled around a data contract
+export * from './components/account-menu'
+// Experimental — see the note in its index.ts.
+export * from './components/article-preview'
+export * from './components/document-preview'
+export * from './components/facet-filters'
+export * from './components/mermaid-block'
+export * from './components/resizable-column'
+export * from './components/settings'
+export * from './components/side-dialog'
+export * from './components/side-tabs'
+export * from './components/slide-over'
+
+// Hooks
+export * from './hooks/useAutoGrowTextarea'
+export * from './hooks/useDismissableTip'
+export * from './hooks/useHoverCard'
+export * from './hooks/useMediaQuery'
+export * from './hooks/useOverlayLayer'
+export * from './hooks/useResizablePanel'
+export * from './hooks/useResizableWidth'
+export * from './hooks/useSpeechRecognition'
+export * from './hooks/useStickToBottom'
+export * from './hooks/useWheelToHorizontal'
+
+// Settings — feature catalogue, persistence, palettes and highlight swatches
+export * from './lib/settings'
+
+// Custom palettes — built at runtime from a few seed colours
+export * from './lib/palette'
+
+// Overlay stacking, sizing, key names
+export * from './lib/keyLabels'
+export * from './lib/overlay'
+export * from './lib/uiSize'

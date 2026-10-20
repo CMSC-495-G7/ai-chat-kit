@@ -1,0 +1,4 @@
+# Conflict markers first: a clear, named failure beats the formatter choking on an
+# unparseable file, and it also covers file types lint-staged doesn't touch.
+sh scripts/no-conflict-markers.sh
+npx lint-staged

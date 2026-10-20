@@ -1,0 +1,8 @@
+# Full-project gates before pushing: type-check, then lint the whole tree
+# (warnings fail the push, matching the pre-commit gate).
+#
+# The conflict check repeats here because a commit made with --no-verify still
+# has to pass this before anything reaches a shared branch.
+sh scripts/no-conflict-markers.sh
+npm run typecheck
+npx oxlint --max-warnings=0

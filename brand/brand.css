@@ -1,0 +1,786 @@
+/* ============================================================================
+   brand.css — every color decision in the library lives here.
+   ============================================================================
+
+   Three tiers:
+
+     1. RAMPS + SURFACES   a theme declares these  (§3, §4)
+     2. SEMANTIC TOKENS    derived from tier 1     (§1 light, §2 dark)
+     3. TAILWIND NAMES     `@theme inline` in tokens.css maps tier 2 onto
+                           utilities, so `bg-accent` compiles straight to
+                           `var(--accent)` with no `:root` pinning — which is
+                           what lets any scope re-theme the whole tree.
+
+   HOW A CONSUMING APP PICKS A THEME
+   ---------------------------------
+   Put the theme class (or data attribute) on the element that also carries
+   `dark`/`light` — `<html>` for a normal app, the widget wrapper for the
+   embedded widget (see the `themeClass` mount option):
+
+     <html class="chat-theme-deep dark">
+     <html data-chat-theme="deep" class="dark">
+
+   Both forms work for every theme. Theme class names MUST start with
+   `chat-theme-` — the derivation blocks below match on that prefix.
+
+   ADDING A THEME
+   --------------
+   Copy the commented template at the bottom of §4. A theme is ONE block: it
+   declares its ramps plus its light *and* dark surface/ink values (the
+   `-light` / `-dark` suffixed inputs), and everything else derives. Nothing
+   needs to be added to §1/§2 — they already match any `chat-theme-*` class.
+
+   A theme may also override any tier-2 token directly; §3/§4 come after
+   §1/§2 so equal-specificity overrides win.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   §1  SEMANTIC TOKENS — LIGHT
+   `:host` is required: inside the widget's shadow root `:root` never matches.
+   ------------------------------------------------------------------------ */
+:root,
+:host,
+[class*='chat-theme'],
+[data-chat-theme] {
+  /* typography */
+  --font-brand: var(--font-brand-family);
+  --font-display: var(--font-display-family, var(--font-brand-family));
+
+  /* surfaces */
+  --canvas: var(--canvas-light);
+  --panel: var(--panel-light);
+  --panel-solid: var(--panel-solid-light);
+  --line: color-mix(in srgb, var(--brand-800) 10%, transparent);
+  /* The rail down the inside of a turn (reasoning, tool payloads, the trace
+     timeline). It carries meaning rather than decoration, so WCAG 2.2 SC 1.4.11
+     applies and it needs 3:1. The alpha is baked in on purpose: components use a bare `border-rail`, so
+     no one can reintroduce an opacity modifier and quietly break the ratio. */
+  --rail: color-mix(in srgb, var(--brand-600) 70%, transparent);
+  --scrim: var(--brand-950);
+  --canvas-glow-a: color-mix(in srgb, var(--brand-600) 8%, transparent);
+  --canvas-glow-b: color-mix(in srgb, var(--accent-500) 7%, transparent);
+
+  /* text */
+  --ink-strong: var(--ink-strong-light);
+  --ink: var(--ink-light);
+  --ink-soft: var(--ink-soft-light);
+
+  /* neutral wash — the single hover/active tint. Used with an opacity
+     modifier (`hover:bg-tint/8`) so one token covers every step, and the
+     old `dark:hover:bg-white/8` counterparts disappear. */
+  --tint: var(--brand-600);
+
+  /* sunken surfaces (inline code, code blocks) */
+  --code: color-mix(in oklab, var(--brand-600) 8%, transparent);
+  --code-block: color-mix(in oklab, var(--brand-950) 4%, transparent);
+
+  /* accent — the action / attention colour */
+  --accent: var(--accent-500);
+  --accent-hover: var(--accent-600);
+  --on-accent: #ffffff;
+  /* Accent as *text* on --canvas — a step darker than the solid fill, so it
+     clears 4.5:1 rather than the ~3:1 a mid-ramp step manages. Kept as its own
+     token so a fill value is never reused as text (the mistake this fixes). */
+  --accent-fg: var(--accent-700);
+  /* <mark> — the cited passage in a reference doc, and the same passage in a
+     citation's hover preview. Warm rather than the action hue on purpose: a
+     highlight marks *where to look*, and sharing a colour with every button
+     and link on the page makes it read as another control. Used at 25% alpha,
+     which keeps --ink-strong on it at 11:1+ in every shipped theme, so the
+     choice below is about how clearly the tint reads, not about text contrast.
+     Swap it for one of the §5 swatches. */
+  --highlight: var(--ember-500, var(--accent-500));
+  /* How much of that hue the wash carries. A token rather than a `/25` in the
+     markup because the right strength depends on what is behind it: on white,
+     25% of a saturated hue is plainly that hue, and more would start to fight
+     the text. Dark needs much more (see §2), and two of the §5 swatches need
+     their own. */
+  --highlight-strength: 25%;
+  /* WCAG 2.2 wants 3:1 for a focus indicator; 600 clears it with room. */
+  --focus-ring: var(--accent-600);
+  --selection: color-mix(in srgb, var(--accent-500) 28%, transparent);
+
+  /* brand — the identity colour */
+  --brand-fg: var(--brand-500); /* brand legible on --canvas (links, tints) */
+  --brand-fg-hover: var(--brand-600);
+  /* Every solid brand fill: the send/stop button, the sidebar avatar, a
+     selected row. One pair rather than three — this and the old --selected
+     resolved to the same two values here, and duplicate names are three places
+     to remember when re-theming instead of one. */
+  --brand-solid: var(--brand-600);
+  --on-brand-solid: #ffffff;
+  /* The composer's send/stop button, and only that control. It defaults to the
+     brand fill — light mode has no reason to differ — but it is its own token
+     so a dark theme can make that one button warm without dragging every other
+     brand fill along with it: the sidebar avatar, a selected reference row and
+     a workflow node all stay on --brand-solid. See §2, where it goes ember.
+
+     Why one button rather than a warm accent everywhere: on a dark field a
+     saturated orange stops reading as emphasis the moment there is more than
+     one of it. Concentrating the whole warm budget in the single control the
+     eye returns to is what keeps it from going garish. */
+  --action: var(--brand-solid);
+  --on-action: var(--on-brand-solid);
+  --chip: color-mix(in oklab, var(--brand-600) 10%, transparent); /* chip fill */
+  --chip-hover: color-mix(in oklab, var(--brand-600) 20%, transparent);
+  --chip-fg: var(--brand-600);
+  --bubble: var(--brand-600); /* user message bubble */
+  --on-bubble: #ffffff;
+
+  /* Activity marker on the launcher — one of the two places the warm hue
+     carries meaning rather than decoration (--marker below is the other), so
+     unlike the raw --ember-* ramp it is contrast-checked.
+
+     A literal rather than a ramp step, and the only one in this file, because
+     a white count on an orange badge is squeezed from both sides at once: the
+     ink needs 4.5:1 on the fill (so the fill must be DARK) and the badge needs
+     3:1 on the surface behind it (so against a navy one the fill must be
+     LIGHT). That leaves a band about one ramp step wide, and no theme's
+     --ember-600 sits in it — every one of them clears white comfortably and
+     then falls to 2.8-3.0:1 against the darkest shipped surface. This value
+     clears both in every shipped theme, light and dark: 4.64:1 for white on
+     the fill, and 3.12-4.64:1 for the fill on the panels and canvases it can
+     land on.
+
+     Where it overhangs the launcher sphere none of that applies — the sphere
+     is a gradient carrying this same warm hue, and the fill against its bloom
+     is 1.49:1. The badge carries a shadow for that edge rather than a border;
+     see ChatWidget.
+
+     So don't "simplify" it back to var(--ember-600), and don't reach for a
+     prettier orange without re-running both ratios. A theme that wants its own
+     may override --notify / --on-notify directly. */
+  --notify: #cb4a11;
+  --on-notify: #ffffff;
+
+  /* A demo app's back-to-demos bookmark (the `.demo-marker` rule lives in
+     that app). The second place the warm hue carries meaning rather than
+     decoration, so like --notify it is contrast-checked and unlike the raw
+     --ember-* ramp it may not be swapped for a prettier step: the 600 is the
+     shallowest one that clears 4.5:1 behind a white label (5.2:1), where the
+     500 manages only ~3.5:1. Dark inverts — see §2. */
+  --marker: var(--ember-600, var(--accent-600));
+  --on-marker: #ffffff;
+
+  /* Warning is gold rather than ember-orange so its tint remains visibly
+     separate from the red error family when an Alert omits its accent rail.
+     The ink/rail clears 4.92:1 on white and 4.64:1 on the tinted surface below
+     across every shipped light theme. A warning still carries a glyph and
+     visible wording; gold is reinforcement, never the only signal. */
+  --caution: #a16207;
+  --caution-surface: color-mix(in oklab, #eab308 10%, var(--panel-solid));
+  --caution-line: color-mix(in oklab, var(--caution) 34%, transparent);
+
+  /* Syntax is presentation, not status. Code strings keep the established warm
+     brand note instead of inheriting semantic warning whenever that hue moves. */
+  --syntax-string: var(--ember-600, var(--accent-600));
+
+  /* status */
+  /* Success is deliberately semantic rather than part of the brand or chip
+     palettes. The rail/icon step clears 4.5:1 against every shipped light
+     canvas, while the darker text step clears 6.5:1. Components still pair it
+     with a check and visible copy: green never carries meaning on its own. */
+  --success: #15803d;
+  --success-fg: #166534;
+  --success-surface: color-mix(in oklab, #22c55e 8%, var(--panel-solid));
+  --success-line: color-mix(in oklab, var(--success) 34%, transparent);
+  --on-success: #ffffff;
+
+  --danger: var(--danger-500);
+  --danger-fg: var(--danger-700);
+  --danger-fg-soft: var(--danger-600);
+  --danger-solid: var(--danger-600);
+  --danger-solid-hover: var(--danger-700);
+  --on-danger-solid: #ffffff;
+
+  /* Named chip colours. These are a deliberately small communication palette,
+     separate from domain semantics: callers may say `green` without claiming
+     the label means success. Each set keeps its own ink, wash, and hairline so
+     both filled and outlined Pills survive theme changes. */
+  --pill-green-fg: oklch(42% 0.13 145);
+  --pill-green-surface: oklch(92% 0.08 145);
+  --pill-green-line: oklch(55% 0.14 145);
+  --pill-orange-fg: oklch(48% 0.15 55);
+  --pill-orange-surface: oklch(92% 0.07 65);
+  --pill-orange-line: oklch(65% 0.16 55);
+  --pill-yellow-fg: oklch(43% 0.11 90);
+  --pill-yellow-surface: oklch(94% 0.09 95);
+  --pill-yellow-line: oklch(72% 0.15 90);
+  --pill-red-fg: var(--danger-fg);
+  --pill-red-surface: color-mix(in oklab, var(--danger) 16%, var(--panel-solid));
+  --pill-red-line: color-mix(in oklab, var(--danger) 70%, transparent);
+
+  /* shadows (consumed as `shadow-(color:--shadow-…)`) */
+  --shadow-soft: color-mix(in oklab, var(--brand-600) 5%, transparent);
+  --shadow-raised: color-mix(in oklab, var(--brand-600) 10%, transparent);
+  --shadow-bubble: color-mix(in oklab, var(--brand-600) 20%, transparent);
+  --shadow-accent: color-mix(in oklab, var(--accent-500) 30%, transparent);
+  --shadow-menu: color-mix(in oklab, var(--brand-950) 20%, transparent);
+  --shadow-deep: color-mix(in oklab, var(--brand-950) 25%, transparent);
+
+  /* the orb logo mark — five stacked radial gradients, see .orb in tokens.css.
+     Its two warm blooms come from --ember-*, which is deliberately NOT part of
+     the accent ramp: the mark is aria-hidden decoration, so it can carry a hue
+     that would never clear 4.5:1 as text. Keep it that way — a warm value
+     wanted for UI state gets its own contrast-checked token instead (see
+     --notify and --marker above, which are the only such cases). Themes that declare no
+     ember fall back to their accent. */
+  --orb-sheen: #ffffff;
+  --orb-1: var(--ember-300, var(--accent-300));
+  --orb-2: var(--ember-500, var(--accent-500));
+  --orb-3: var(--brand-500);
+  --orb-core-from: var(--brand-300);
+  --orb-core-to: var(--brand-600);
+  --orb-shade: var(--brand-950);
+  --orb-glow: color-mix(in srgb, var(--brand-600) 35%, transparent);
+  --on-orb: #ffffff;
+}
+
+/* ---------------------------------------------------------------------------
+   §2  SEMANTIC TOKENS — DARK  (only what differs from §1)
+
+   Three selectors: the themed element is itself `.dark` (app root / widget
+   wrapper), the shadow host is `.dark`, or a theme root sits inside a `.dark`
+   ancestor. A theme that needs its own dark overrides must use a two-class
+   selector (`.chat-theme-x.dark` or `.dark .chat-theme-x`) to outrank the
+   third one.
+   ------------------------------------------------------------------------ */
+.dark,
+:host(.dark),
+.dark :is([class*='chat-theme'], [data-chat-theme]) {
+  --canvas: var(--canvas-dark);
+  --panel: var(--panel-dark);
+  --panel-solid: var(--panel-solid-dark);
+  --line: color-mix(in srgb, var(--brand-200) 14%, transparent);
+  --canvas-glow-a: color-mix(in srgb, var(--brand-500) 16%, transparent);
+  /* The one decorative warm note. Both blooms were the same blue, which is
+     most of why a dark canvas that had lost its orange read as flat: two
+     washes of the same hue behind a single-hue UI leave nothing for the eye to
+     move between. Ember at 14% is under the threshold where it reads as an
+     orange page — it reads as depth — and being pure decoration (see
+     AmbientGlow, which is aria-hidden) it carries no contrast bar. */
+  --canvas-glow-b: color-mix(in srgb, var(--ember-500, var(--accent-500)) 14%, transparent);
+
+  --ink-strong: var(--ink-strong-dark);
+  --ink: var(--ink-dark);
+  --ink-soft: var(--ink-soft-dark);
+
+  /* on a dark canvas the neutral wash lifts rather than deepens */
+  --tint: #ffffff;
+  /* Same lift for the rail — a light neutral rather than the brand blue, which
+     goes muddy against a navy canvas. 45% clears 3:1 in every shipped theme. */
+  --rail: color-mix(in srgb, #ffffff 45%, transparent);
+  --code: color-mix(in oklab, #ffffff 10%, transparent);
+  --code-block: color-mix(in oklab, #ffffff 5%, transparent);
+
+  /* Blue as text on a dark panel needs the 300 step — 400 lands ~3.1-3.9:1,
+     under the 4.5:1 text bar in every shipped theme. */
+  --accent-fg: var(--accent-300);
+  /* A brighter, more chromatic orange than light mode's, and a far heavier
+     wash — the two go together.
+
+     The reason is that a translucent warm hue over navy is mostly navy: at the
+     25% light mode uses, EVERY orange in the ramp composites to something
+     within about 6/255 of neutral, i.e. grey. It is not a bad choice of
+     orange, it is the alpha. At 45% the composite finally carries the hue
+     (~43/255 of spread) while --ink-strong on it still reads at 6:1, comfortably
+     past the 4.5:1 text bar. Cold hues don't have this problem — blue and teal
+     read at any strength — which is why the old blue highlight never needed it.
+     Two §5 swatches go lighter still; see there. */
+  --highlight: #fb923c;
+  --highlight-strength: 45%;
+  /* A focus indicator only needs 3:1, which 400 clears. */
+  --focus-ring: var(--accent-400);
+  /* Solid accent fills invert on dark for the same reason --brand-solid does
+     below: a mid-ramp blue sits at ~2.0-2.8:1 against the panel and the badge
+     simply disappears. Pale fill, deep glyph — both ends clear then. */
+  --accent: var(--accent-200);
+  --on-accent: var(--accent-700);
+
+  --brand-fg: var(--brand-300);
+  --brand-fg-hover: var(--brand-200);
+  /* A solid fill has two contrast constraints at once — the fill against the
+     panel, and the glyph against the fill — and no blue in the ramp clears both
+     on a dark canvas (600 is 1.89:1 on the panel, 300 drops a white glyph to
+     2.41:1). So dark inverts instead: a near-white fill with a deep glyph, the
+     same lift --rail and --tint already make. Don't "fix" this back to blue. */
+  --brand-solid: var(--brand-50);
+  --on-brand-solid: var(--brand-950);
+  /* Dark is where --action stops agreeing with --brand-solid: the send button
+     goes ember, the only saturated fill on the whole surface. Same inversion
+     logic as --marker — bright fill, deep glyph — and checked the same way,
+     because both of its ratios are tight in the other direction to light mode.
+     Across the three shipped themes: 5.5-6.0:1 for the fill on the canvas and
+     5.0-5.7:1 on the panel it actually sits on (3:1 is the bar for a control,
+     SC 1.4.11), and 5.7:1 for the glyph on the fill (4.5:1 bar).
+
+     --on-action is the same near-black brown --on-marker uses, and for the
+     same reason: white on this orange is 3.1:1 and fails. Don't "tidy" it to
+     #fff, and don't reach for a lighter ember — the 300 drops the glyph ratio
+     below the bar. A theme wanting its own warm action overrides both. */
+  --action: var(--ember-500, var(--accent-500));
+  --on-action: #2b1000;
+  --chip: color-mix(in oklab, var(--brand-300) 15%, transparent);
+  --chip-hover: color-mix(in oklab, var(--brand-300) 25%, transparent);
+  --chip-fg: var(--brand-200);
+  --bubble: var(--brand-500);
+
+  /* The same inversion --brand-solid makes above, for the same reason: the
+     deep 600 orange sits at ~1.9:1 against a navy panel and the tab simply
+     disappears. Bright fill, deep glyph — 5.1:1 for the fill on the canvas,
+     4.9:1 for the label on the fill. Don't "simplify" --on-marker to white:
+     white on the 500 is 3.5:1 and fails the text bar. */
+  --marker: var(--ember-500, var(--accent-500));
+  --on-marker: #2b1000;
+
+  /* Yellow-gold stays unmistakable on both navy and graphite. It clears at
+     least 11.82:1 on an untinted panel and 8.90:1 on the 15% wash across all
+     shipped dark themes. */
+  --caution: #fde047;
+  --caution-surface: color-mix(in oklab, #eab308 15%, var(--panel-solid));
+  --caution-line: color-mix(in oklab, var(--caution) 34%, transparent);
+
+  --syntax-string: var(--ember-300, var(--accent-300));
+
+  /* Bright green lifts cleanly from all navy and graphite panels (8.9:1+);
+     the deep glyph colour inverts for a future solid success control. */
+  --success: #4ade80;
+  --success-fg: #86efac;
+  --success-surface: color-mix(in oklab, var(--success) 14%, var(--panel-solid));
+  --success-line: color-mix(in oklab, var(--success) 34%, transparent);
+  --on-success: #052e16;
+
+  --danger-fg: var(--danger-300);
+  --danger-fg-soft: var(--danger-400);
+  --danger-solid: var(--danger-300);
+  --danger-solid-hover: color-mix(in oklab, var(--danger-300) 78%, white);
+  --on-danger-solid: #450a0a;
+
+  --pill-green-fg: oklch(79% 0.13 145);
+  --pill-green-surface: color-mix(in oklab, oklch(70% 0.16 145) 18%, var(--panel-solid));
+  --pill-green-line: oklch(65% 0.14 145);
+  --pill-orange-fg: oklch(82% 0.12 65);
+  --pill-orange-surface: color-mix(in oklab, oklch(72% 0.15 55) 18%, var(--panel-solid));
+  --pill-orange-line: oklch(69% 0.14 55);
+  --pill-yellow-fg: oklch(86% 0.12 95);
+  --pill-yellow-surface: color-mix(in oklab, oklch(80% 0.14 95) 18%, var(--panel-solid));
+  --pill-yellow-line: oklch(76% 0.13 90);
+  --pill-red-fg: var(--danger-fg);
+  --pill-red-surface: color-mix(in oklab, var(--danger) 18%, var(--panel-solid));
+  --pill-red-line: color-mix(in oklab, var(--danger) 75%, transparent);
+
+  /* a brand-tinted shadow disappears on a dark canvas; use real black */
+  --shadow-soft: color-mix(in oklab, #000000 20%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   §3  DEFAULT THEME — Navy (brand blue, used for accent too)
+   Also the fallback for `:root` and `:host` when no theme class is set.
+
+   A handful of anchor values; the rest are tints/shades derived from them.
+   ------------------------------------------------------------------------ */
+:root,
+:host,
+.chat-theme-default,
+[data-chat-theme='default'] {
+  --font-brand-family: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --brand-50: #eef4fb;
+  --brand-100: #d9e6f5;
+  --brand-200: #aecbe9;
+  --brand-300: #7dabdb;
+  --brand-400: #3d7fc4;
+  --brand-500: #0069aa; /* secondary blue */
+  --brand-600: #004c97; /* primary blue */
+  --brand-700: #003f7e;
+  --brand-800: #003365;
+  --brand-900: #002a52;
+  --brand-950: #001932;
+
+  /* accent — the action hue. Aliased to the brand blue: this product runs one
+     hue, and the orange it replaced failed 4.5:1 as text and behind a white
+     glyph (~3.1:1 both). var() rather than copied hex so the two can't drift. */
+  --accent-200: var(--brand-200); /* dark-mode solid fill (see §2) */
+  --accent-300: var(--brand-300);
+  --accent-400: var(--brand-400);
+  --accent-500: var(--brand-500);
+  --accent-600: var(--brand-600);
+  --accent-700: var(--brand-700);
+  /* The warm ramp. 300/500 are decoration — the orb's two blooms (--orb-1 /
+     --orb-2 in §1) and the activity count's fill; 600 is not, it backs the
+     demo shell's bookmark (--marker) behind a white label, so it is picked for
+     contrast rather than for looks. */
+  --ember-300: #ffb27a;
+  --ember-500: #ef6a00;
+  --ember-600: #c2410c;
+
+  --danger-300: oklch(80.8% 0.114 19.571);
+  --danger-400: oklch(70.4% 0.191 22.216);
+  --danger-500: oklch(63.7% 0.237 25.331);
+  --danger-600: oklch(57.7% 0.245 27.325);
+  --danger-700: oklch(50.5% 0.213 27.518);
+
+  --canvas-light: #f5f7f9;
+  --panel-light: rgba(255, 255, 255, 0.62);
+  --panel-solid-light: #ffffff;
+  --ink-strong-light: #1c2733;
+  --ink-light: #2d3943; /* body ink */
+  --ink-soft-light: #64727e; /* secondary ink */
+
+  /* Dark deliberately does NOT reuse --brand-950/-900 the way light reuses the
+     brand ink. Those are the identity blue at full chroma, and a whole surface
+     painted in them is the "too blue" complaint: the old panel sat at oklch
+     chroma 0.085, which is more colour than any dark UI worth copying puts on
+     a field (see the graphite theme below, at 0.006). These are the same navy
+     pulled back to 0.046 / 0.062 — still plainly the brand blue next to the light
+     mode, no longer competing with the content on it. Ink ratios are
+     unaffected: 16.7:1 strong, 14.6:1 body, 6.8:1 soft on the canvas. */
+  --canvas-dark: #04172a;
+  --panel-dark: rgba(10, 36, 64, 0.58);
+  --panel-solid-dark: #0a2440;
+  --ink-strong-dark: #f2f6fa;
+  --ink-dark: #e0e8f0;
+  --ink-soft-dark: #93a1ad;
+}
+
+/* ---------------------------------------------------------------------------
+   §4  ALTERNATE THEMES
+   Each is a single block. Nothing else in this file (or the library) changes.
+   ------------------------------------------------------------------------ */
+
+/* Classic — the palette this library shipped with before the default was
+   realigned. Same blue, a slightly desaturated navy. (Its lighter orange went the way of the default's — see the accent
+   block below.) */
+.chat-theme-classic,
+[data-chat-theme='classic'] {
+  --font-brand-family: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --brand-50: #eef4fb;
+  --brand-100: #d9e6f5;
+  --brand-200: #aecbe9;
+  --brand-300: #7dabdb;
+  --brand-400: #3d7fc4;
+  --brand-500: #0069aa;
+  --brand-600: #004c97;
+  --brand-700: #003d7a;
+  --brand-800: #0d2f56;
+  --brand-900: #0e2238;
+  --brand-950: #0a1828;
+
+  /* accent — the action hue. Aliased to the brand blue: this product runs one
+     hue, and the orange it replaced failed 4.5:1 as text and behind a white
+     glyph (~3.1:1 both). var() rather than copied hex so the two can't drift. */
+  --accent-200: var(--brand-200); /* dark-mode solid fill (see §2) */
+  --accent-300: var(--brand-300);
+  --accent-400: var(--brand-400);
+  --accent-500: var(--brand-500);
+  --accent-600: var(--brand-600);
+  --accent-700: var(--brand-700);
+  /* The warm ramp. 300/500 are decoration — the orb's two blooms (--orb-1 /
+     --orb-2 in §1) and the activity count's fill; 600 is not, it backs the
+     demo shell's bookmark (--marker) behind a white label, so it is picked for
+     contrast rather than for looks. */
+  --ember-300: #ffc48a;
+  --ember-500: #f7841f;
+  --ember-600: #b45309;
+
+  --danger-300: oklch(80.8% 0.114 19.571);
+  --danger-400: oklch(70.4% 0.191 22.216);
+  --danger-500: oklch(63.7% 0.237 25.331);
+  --danger-600: oklch(57.7% 0.245 27.325);
+  --danger-700: oklch(50.5% 0.213 27.518);
+
+  --canvas-light: #f3f6fa;
+  --panel-light: rgba(255, 255, 255, 0.62);
+  --panel-solid-light: #ffffff;
+  --ink-strong-light: #1c2733;
+  --ink-light: #2d3943;
+  --ink-soft-light: #64727e;
+
+  --canvas-dark: #0a1828;
+  --panel-dark: rgba(14, 34, 56, 0.55);
+  --panel-solid-dark: #0e2238;
+  --ink-strong-dark: #f2f6fa;
+  --ink-dark: #e5ebf2;
+  --ink-soft-dark: #93a5b6;
+}
+
+/* Deep — a corporate, institutional look: a deep hero-band navy. Deeper and
+   cooler than the default's blue. */
+.chat-theme-deep,
+[data-chat-theme='deep'] {
+  --font-brand-family: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --brand-50: #eef3f7;
+  --brand-100: #d7e3ec;
+  --brand-200: #aac3d6;
+  --brand-300: #77a0bd;
+  --brand-400: #3d749a;
+  --brand-500: #16587f;
+  --brand-600: #084d77;
+  --brand-700: #073d5f;
+  --brand-800: #063049;
+  --brand-900: #04263c;
+  --brand-950: #001e33; /* the hero band navy */
+
+  /* accent — the action hue. Aliased to the brand blue: this product runs one
+     hue, and the orange it replaced failed 4.5:1 as text and behind a white
+     glyph (~3.1:1 both). var() rather than copied hex so the two can't drift. */
+  --accent-200: var(--brand-200); /* dark-mode solid fill (see §2) */
+  --accent-300: var(--brand-300);
+  --accent-400: var(--brand-400);
+  --accent-500: var(--brand-500);
+  --accent-600: var(--brand-600);
+  --accent-700: var(--brand-700);
+  /* The warm ramp. 300/500 are decoration — the orb's two blooms (--orb-1 /
+     --orb-2 in §1) and the activity count's fill; 600 is not, it backs the
+     demo shell's bookmark (--marker) behind a white label, so it is picked for
+     contrast rather than for looks. */
+  --ember-300: #ffb27a;
+  --ember-500: #ef6a00;
+  --ember-600: #c2410c;
+
+  --danger-300: oklch(80.8% 0.114 19.571);
+  --danger-400: oklch(70.4% 0.191 22.216);
+  --danger-500: oklch(63.7% 0.237 25.331);
+  --danger-600: oklch(57.7% 0.245 27.325);
+  --danger-700: oklch(50.5% 0.213 27.518);
+
+  --canvas-light: #f2f5f8;
+  --panel-light: rgba(255, 255, 255, 0.64);
+  --panel-solid-light: #ffffff;
+  --ink-strong-light: #001e33; /* the hero navy, as heading ink */
+  --ink-light: #2d3943;
+  --ink-soft-light: #5b6770;
+
+  --canvas-dark: #001e33;
+  --panel-dark: rgba(4, 38, 60, 0.6);
+  --panel-solid-dark: #04263c;
+  --ink-strong-dark: #ffffff; /* the hero band sets pure white on navy */
+  --ink-dark: #dbe6ef;
+  --ink-soft-dark: #8fa6b8;
+}
+
+/* Graphite — the near-neutral dark. Same blue identity as the default (it
+   reuses that ramp verbatim, so light mode is indistinguishable from it), but
+   the dark field drops to oklch chroma 0.006 — effectively grey.
+
+   This is the third option because "darker" and "less blue" are the same
+   request answered two ways, and the navy themes can only go so far toward it
+   before they stop being navy. It is also what almost every dark UI worth
+   copying actually does: the surface is neutral and the whole colour budget
+   goes to one or two small elements. Here that is the ember send button
+   (--action, §2) and the ambient bloom, which is why this theme reads as warm
+   rather than cold despite having the least colour of the three.
+
+   Only the dark surfaces are declared as neutrals — the ramps stay blue, so
+   --brand-fg links, --chip fills and --line hairlines keep the identity hue on
+   the grey field instead of turning the theme monochrome. */
+.chat-theme-graphite,
+[data-chat-theme='graphite'] {
+  --font-brand-family: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --brand-50: #eef4fb;
+  --brand-100: #d9e6f5;
+  --brand-200: #aecbe9;
+  --brand-300: #7dabdb;
+  --brand-400: #3d7fc4;
+  --brand-500: #0069aa;
+  --brand-600: #004c97;
+  --brand-700: #003f7e;
+  --brand-800: #003365;
+  --brand-900: #002a52;
+  --brand-950: #001932;
+
+  --accent-200: var(--brand-200);
+  --accent-300: var(--brand-300);
+  --accent-400: var(--brand-400);
+  --accent-500: var(--brand-500);
+  --accent-600: var(--brand-600);
+  --accent-700: var(--brand-700);
+  /* The warm ramp does more work here than in the navy themes — it is the only
+     chromatic thing on the dark field — but the steps are unchanged, because
+     500 backs --action and 600 backs --marker and both are picked for contrast
+     rather than for looks. */
+  --ember-300: #ffb27a;
+  --ember-500: #ef6a00;
+  --ember-600: #c2410c;
+
+  --danger-300: oklch(80.8% 0.114 19.571);
+  --danger-400: oklch(70.4% 0.191 22.216);
+  --danger-500: oklch(63.7% 0.237 25.331);
+  --danger-600: oklch(57.7% 0.245 27.325);
+  --danger-700: oklch(50.5% 0.213 27.518);
+
+  /* Light is the default theme's, value for value — the brief was that light
+     stays put and only dark gets a choice. */
+  --canvas-light: #f5f7f9;
+  --panel-light: rgba(255, 255, 255, 0.62);
+  --panel-solid-light: #ffffff;
+  --ink-strong-light: #1c2733;
+  --ink-light: #2d3943;
+  --ink-soft-light: #64727e;
+
+  /* The neutrals carry a few degrees of blue rather than none: a true grey
+     next to the blue links and chips above reads as a rendering fault, and at
+     this chroma the cast is only visible against a pure grey. Ink is pure
+     white on the canvas at 18.8:1, with the soft step at 6.8:1. */
+  --canvas-dark: #0f1214;
+  --panel-dark: rgba(22, 25, 28, 0.62);
+  --panel-solid-dark: #16191c;
+  --ink-strong-dark: #ffffff;
+  --ink-dark: #dfe3e6;
+  --ink-soft-dark: #949ca3;
+}
+
+/* ---------------------------------------------------------------------------
+   §5  HIGHLIGHT SWATCHES
+
+   `--highlight` backs every <mark> — the cited passage in a reference doc, and
+   that same passage in a citation chip's hover preview. §1/§2 make it the
+   theme's warm hue (orange); these swap it for another one.
+
+   Put the class (or the attribute) on any element — the document root, an app
+   shell, the widget's own root via the `themeClass` mount option, which takes
+   a whole class string:
+
+     <html class="chat-theme-deep chat-highlight-yellow dark">
+     mountWidget(content, { themeClass: 'chat-theme-deep chat-highlight-teal' })
+
+   Every swatch is a pair, because a wash that reads on white disappears on
+   navy and vice versa. The light value is the deeper step.
+
+   ON PICKING ONE. None of these is a contrast failure: each was checked
+   against all three shipped themes in both modes, and --ink-strong on the wash
+   lands between 5.7:1 and 13.5:1 everywhere — the wash strengths in §1/§2 and
+   in the blocks below are what hold that line, so change a hue and you have to
+   re-check its strength.
+
+   What actually differs is how much like itself each one looks. On a light
+   panel every swatch is plainly its own hue, and the only weak one is yellow,
+   which at any strength barely separates from white (1.1-1.2:1) — the classic
+   highlighter colour is the one screens serve worst. On a dark panel it is the
+   warm hues that struggle: they composite toward brown, and orange and amber
+   need the heaviest wash of the set to stay recognisable. The cold hues —
+   blue, teal, violet — read cleanly in both modes, so they are the safe pick
+   for a surface that has to work in either.
+
+   None of which is a substitute for the underline, border or wording that
+   makes a highlight legible without colour at all (WCAG 1.4.1) — a wash is
+   reinforcement, not the signal.
+   ------------------------------------------------------------------------ */
+
+/* The default, stated so it can be set back explicitly. */
+.chat-highlight-orange,
+[data-chat-highlight='orange'] {
+  --highlight: var(--ember-500, var(--accent-500));
+}
+:is(.dark, .dark *).chat-highlight-orange,
+:is(.dark, .dark *)[data-chat-highlight='orange'] {
+  /* Kept in step with §2 by hand — this swatch exists to name the default, so
+     the two must not drift. */
+  --highlight: #fb923c;
+  --highlight-strength: 45%;
+}
+
+.chat-highlight-amber,
+[data-chat-highlight='amber'] {
+  --highlight: #f59e0b;
+}
+:is(.dark, .dark *).chat-highlight-amber,
+:is(.dark, .dark *)[data-chat-highlight='amber'] {
+  --highlight: #fbbf24;
+  --highlight-strength: 38%; /* luminous, like yellow — see there */
+}
+
+.chat-highlight-yellow,
+[data-chat-highlight='yellow'] {
+  --highlight: #facc15;
+}
+:is(.dark, .dark *).chat-highlight-yellow,
+:is(.dark, .dark *)[data-chat-highlight='yellow'] {
+  --highlight: #fde047;
+  /* The most luminous swatch: at the §2 default it drives --ink-strong down to
+     ~4.5:1, right on the bar. 30% keeps it at ~6:1 and yellow is legible on
+     navy at that strength anyway. */
+  --highlight-strength: 30%;
+}
+
+/* The pre-orange default: the theme's own action hue. Kept as a swatch so a
+   surface that wants highlight and accent to agree can still say so. */
+.chat-highlight-blue,
+[data-chat-highlight='blue'] {
+  --highlight: var(--accent-500);
+}
+:is(.dark, .dark *).chat-highlight-blue,
+:is(.dark, .dark *)[data-chat-highlight='blue'] {
+  --highlight: var(--accent-400);
+}
+
+.chat-highlight-teal,
+[data-chat-highlight='teal'] {
+  --highlight: #14b8a6;
+}
+:is(.dark, .dark *).chat-highlight-teal,
+:is(.dark, .dark *)[data-chat-highlight='teal'] {
+  --highlight: #2dd4bf;
+  --highlight-strength: 38%; /* a cold hue reads without the extra wash */
+}
+
+.chat-highlight-violet,
+[data-chat-highlight='violet'] {
+  --highlight: #a855f7;
+}
+:is(.dark, .dark *).chat-highlight-violet,
+:is(.dark, .dark *)[data-chat-highlight='violet'] {
+  --highlight: #c084fc;
+}
+
+/* ---------------------------------------------------------------------------
+   TEMPLATE — copy, rename, fill in. This is the complete set of values a
+   theme has to supply; every other token in §1/§2 derives from these.
+
+.chat-theme-yourbrand,
+[data-chat-theme='yourbrand'] {
+  --font-brand-family: …;                 // body face
+  --font-display-family: …;               // optional, defaults to --font-brand-family
+
+  --brand-50 … --brand-950:  …            // 11 steps, your identity hue
+                                          //   500/600 carry solid fills, 300 is the
+                                          //   dark-mode legible step, 950 the dark canvas
+  --accent-200 … --accent-700: …          // 6 steps, your action hue — alias them to
+                                          //   the brand ramp if you run a single hue
+                                          //   500 is the primary button and every solid
+                                          //   light-mode fill, 600 its hover + the focus
+                                          //   ring, 700 accent-as-text (pick it for
+                                          //   ≥4.5:1 on --canvas-light — a saturated
+                                          //   mid-ramp step is usually only ~3:1 there),
+                                          //   300 accent-as-text on dark, 200 the solid
+                                          //   fill on dark (pale fill, deep glyph)
+  --danger-300 … --danger-700: …          // 5 steps, error states
+
+  --ember-300 / --ember-500 / --ember-600: …
+                                          // optional, your warm hue. 300/500 are decoration:
+                                          //   the orb's two blooms, exempt from contrast rules
+                                          //   because the mark is aria-hidden — never reuse
+                                          //   those for text. 600 IS text-bearing (--marker),
+                                          //   so pick it for ≥4.5:1 behind white. Omit the set
+                                          //   to let both take your accent hue instead.
+
+  --canvas-light: …                       // page background
+  --panel-light: …                        // translucent glass fill (needs alpha)
+  --panel-solid-light: …                  // opaque panel fill
+  --ink-strong-light: …                   // headings
+  --ink-light: …                          // body copy
+  --ink-soft-light: …                     // secondary copy
+
+  --canvas-dark / --panel-dark / --panel-solid-dark:  …
+  --ink-strong-dark / --ink-dark / --ink-soft-dark:   …
+}
+
+   You do not have to edit this file at all: declaring the same variables in
+   your own stylesheet, on `:root` or on any element, re-themes everything
+   below that element. Only the `chat-theme-` class prefix (or the
+   `data-chat-theme` attribute) is load-bearing, and only if you want §1/§2 to
+   re-derive at a scope other than the document root.
+   ------------------------------------------------------------------------ */

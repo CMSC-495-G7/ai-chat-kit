@@ -1,0 +1,111 @@
+/* The chat area's stylesheet. An app imports it after `tailwindcss`,
+   brand/tokens.css and styles.css — see styles.css for why the sheets never
+   import one another. components/chat-widget/widget.css is the one exception,
+   and says why.
+
+   The @source line is what makes this area's class names reach the app's CSS:
+   Tailwind only auto-scans the app's own Vite root, and this package is
+   outside it. It resolves against this file's real path. */
+@source "./**/*.{ts,tsx}";
+
+/* Utilities only the chat components use. */
+
+@layer utilities {
+  /* The controls under a message: always rendered, seen only when the turn is
+     hovered or holds focus.
+
+     Opacity rather than `display`, and that is three decisions at once. The
+     row keeps its place in the tab order, so a keyboard reaches it and brings
+     it back into view on the way. The transcript does not jump by a row's
+     height the moment a pointer crosses it, because the space was never given
+     up. And `pointer-events` leaves with the opacity, so an invisible button
+     cannot be clicked.
+
+     A utility class rather than `opacity-0 group-hover/turn:opacity-100` in
+     the markup: those are two utilities setting one property, and which wins
+     depends on Tailwind's sort order rather than on anything written here.
+     It resolved the wrong way round — the row stayed invisible while its
+     pointer-events came back, which is the worst of both. Specificity settles
+     it here instead.
+
+     Reveal keys off `.group/turn` on the whole turn: a control that appears
+     only once the pointer is already on it is a control nobody finds. */
+  .message-actions {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+  }
+
+  .group\/turn:hover .message-actions,
+  .group\/turn:focus-within .message-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* No hover to reveal it with. This is the pointer, not the width: a widget
+     on a desktop is narrow and still has one. */
+  @media (hover: none) {
+    .message-actions {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  /* The wash behind a cited passage — every <mark> in the library.
+     A utility rather than `bg-highlight/25` in the markup, because the alpha
+     is not a constant: brand.css tunes --highlight-strength per mode and per
+     swatch (a warm hue needs 45% to read on navy and 25% on white), and an
+     opacity modifier in a class string can't vary.
+
+     And a utility rather than a `--highlight-wash` token, which looks like the
+     obvious move and silently doesn't work: a custom property containing
+     var() is substituted where it is DECLARED, so a wash composed on :root
+     would keep :root's hue and strength no matter what a `.dark` ancestor or a
+     swatch class redeclared below it. Composing here means the mix resolves on
+     the <mark> itself, against whatever it actually inherits. */
+  .highlight-wash {
+    background-color: color-mix(
+      in oklab,
+      var(--highlight) var(--highlight-strength, 25%),
+      transparent
+    );
+  }
+
+  /* The launcher's first-run label. Collapsed to a zero-width grid column and
+     revealed on hover or focus — 0fr/1fr rather than a fixed width so it sizes
+     to whatever label the host passes instead of clipping a longer one.
+     The sphere is NOT inside this, so it never moves: a label that pushed the
+     sphere would drop the hover that opened it, collapse, and chatter.
+     Hover is gated on a real pointer — on touch :hover sticks after a tap and
+     the label would never close again. Focus-visible is not optional: this
+     label is the button's only visible name. */
+  .launcher-label {
+    display: grid;
+    grid-template-columns: 0fr;
+    transition: grid-template-columns 180ms cubic-bezier(0.22, 1, 0.36, 1) 80ms;
+  }
+  .launcher-label > span {
+    min-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+  }
+  @media (hover: hover) {
+    .launcher-expandable:hover .launcher-label {
+      grid-template-columns: 1fr;
+      transition-delay: 0ms;
+    }
+    .launcher-expandable:hover .launcher-label > span {
+      opacity: 1;
+      transition-delay: 60ms;
+    }
+  }
+  .launcher-expandable:focus-visible .launcher-label {
+    grid-template-columns: 1fr;
+    transition-delay: 0ms;
+  }
+  .launcher-expandable:focus-visible .launcher-label > span {
+    opacity: 1;
+    transition-delay: 60ms;
+  }
+}

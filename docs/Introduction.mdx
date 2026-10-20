@@ -1,0 +1,64 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Docs/Introduction" />
+
+# ai-chat-kit
+
+A chat UI kit: the brand, the primitives, the components the chat is built
+from, the chat itself, and an embeddable chat widget. Every module is shown in
+every state worth looking at.
+
+New here? Start with the <a href="./walkthrough.html" target="_blank" rel="noreferrer">walkthrough</a>:
+screenshots of the full chat app, cited answers, the embeddable widget, dark
+mode and phone width. It is one self-contained file, `public/walkthrough.html`,
+so it also opens straight from the repo without running anything.
+
+```sh
+npm install
+npm run storybook          # dev server on :6006
+```
+
+## What is where
+
+The sidebar mirrors the folders.
+
+| Sidebar               | Folder                 | What it holds                                                          |
+| --------------------- | ---------------------- | ---------------------------------------------------------------------- |
+| **Brand**             | `brand/`               | The palettes, the type, shape and motion, and a custom palette builder |
+| **Primitives**        | `src/primitives/`      | One control or one visual atom each: buttons, inputs, pills, overlays  |
+| **Components**        | `src/components/`      | Primitives assembled around a data contract: facet filters, previews   |
+| **Chat / Components** | `src/chat/components/` | What only makes sense in a conversation: composer, message, the widget |
+| **Chat / Recipes**    | `src/chat/recipes/`    | A live conversation, the full chat page, the widget on a host page     |
+
+## The toolbar
+
+Four globals, applied to `<html>` so portals follow them:
+
+- **Mode** — `light` / `dark`
+- **Palette** — a `chat-theme-*` class, or a custom palette (Teal, Plum, Crimson)
+- **Highlight** — the `chat-highlight-*` colour behind cited passages
+- **Density** — `UiSizeProvider`; `compact` is what the embedded widget runs
+
+## Using the kit in an app
+
+The package is source-only: the app's own Vite compiles it. Two entry points.
+
+```ts
+import { Button, usePalette } from 'ai-chat-kit'
+import { Composer, useChat, mountWidget } from 'ai-chat-kit/chat'
+```
+
+```css
+@import 'tailwindcss';
+@import 'ai-chat-kit/brand/tokens.css';
+@import 'ai-chat-kit/styles.css';
+@import 'ai-chat-kit/chat.css';
+```
+
+The widget brings its own stylesheet into its shadow root:
+`import cssText from 'ai-chat-kit/widget.css?inline'`.
+
+Colours: see [Theming](?path=/docs/docs-theming--docs).
+
+Next: [Structure](?path=/docs/docs-structure--docs) — the tiers, the shape every
+folder follows, and how to add a story to one.

@@ -1,0 +1,26 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+storybook-static
+*.local
+
+# Story screenshots: a baseline and the run compared against it
+.screenshots
+
+# Raw walkthrough captures; public/walkthrough.html carries them inlined
+screenshots
+
+# Playwright output
+test-results
+playwright-report
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?

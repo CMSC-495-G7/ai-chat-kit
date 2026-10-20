@@ -1,0 +1,128 @@
+/* ArticlePreview — the sheet's own colours, and the typography of rich text.
+
+   The sheet is white in both colour modes, so its inks are fixed here instead
+   of taken from the brand tokens, which flip in dark mode.
+
+   Rich text is HTML an author wrote in another system: bare tags, no classes.
+   Tailwind's preflight strips those of all styling, so this gives them back
+   the ordinary look of a document — and no more, so the author's own inline
+   colours and alignment still win. Every rule is scoped under the sheet.
+
+   In @layer components so a caller's Tailwind utilities still win. */
+
+@layer components {
+  .article-preview {
+    --article-ink: #1f2933;
+    --article-soft: #5b6672;
+    --article-line: #dfe3e8;
+    --article-link: #1d4ed8;
+  }
+
+  .article-preview .article-link,
+  .article-rich-text a[href] {
+    color: var(--article-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* A long word wraps instead of pushing the sheet wider — but only when it
+     has to, so a table's columns aren't squeezed to a letter each. */
+  .article-rich-text {
+    overflow-wrap: break-word;
+  }
+  .article-rich-text > :first-child {
+    margin-top: 0;
+  }
+  .article-rich-text > :last-child {
+    margin-bottom: 0;
+  }
+
+  .article-rich-text :is(p, ul, ol, blockquote, pre, table, figure) {
+    margin-block: 0.75em;
+  }
+  .article-rich-text :is(h1, h2, h3, h4, h5, h6) {
+    margin-block: 1.4em 0.5em;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .article-rich-text h1 {
+    font-size: 1.35em;
+  }
+  .article-rich-text h2 {
+    font-size: 1.2em;
+  }
+  .article-rich-text h3 {
+    font-size: 1.08em;
+  }
+
+  .article-rich-text ul {
+    list-style: disc;
+    padding-inline-start: 1.4em;
+  }
+  .article-rich-text ol {
+    list-style: decimal;
+    padding-inline-start: 1.6em;
+  }
+  .article-rich-text li {
+    margin-block: 0.25em;
+  }
+  .article-rich-text li > :is(ul, ol) {
+    margin-block: 0.25em;
+  }
+
+  .article-rich-text :is(b, strong) {
+    font-weight: 700;
+  }
+  .article-rich-text blockquote {
+    border-inline-start: 3px solid var(--article-line);
+    padding-inline-start: 1em;
+    color: var(--article-soft);
+  }
+  .article-rich-text hr {
+    margin-block: 1.5em;
+    border-color: var(--article-line);
+  }
+
+  .article-rich-text :is(code, pre) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
+  }
+  .article-rich-text code {
+    border-radius: 4px;
+    background: #f1f3f5;
+    padding: 0.1em 0.3em;
+  }
+  .article-rich-text pre {
+    overflow-x: auto;
+    border-radius: 6px;
+    background: #f1f3f5;
+    padding: 0.8em 1em;
+  }
+  .article-rich-text pre code {
+    background: none;
+    padding: 0;
+  }
+
+  /* A picture never wider than the sheet; a wide table scrolls inside it. */
+  .article-rich-text :is(img, video) {
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+  }
+  .article-rich-text table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+  .article-rich-text :is(th, td) {
+    border: 1px solid var(--article-line);
+    padding: 0.4em 0.7em;
+    text-align: start;
+    vertical-align: top;
+  }
+  .article-rich-text th {
+    background: #f6f7f9;
+    font-weight: 700;
+  }
+}

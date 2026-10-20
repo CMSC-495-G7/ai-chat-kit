@@ -1,0 +1,19 @@
+/* The preview's whole stylesheet, in the order an app imports the same
+   sheets: Tailwind, the brand, then the library's areas. The library's sheets
+   declare their own @source lines; the ones below cover what only Storybook
+   renders. `source(none)` keeps node_modules and build output out of the scan. */
+@import 'tailwindcss' source(none);
+@import '../brand/tokens.css';
+@import '../src/styles.css';
+@import '../src/chat/chat.css';
+
+@source "../src/fixtures";
+@source "../docs";
+@source "../brand";
+@source "./";
+
+/* The docs pages render stories inline on Storybook's own surface; give the
+   specimens the brand canvas so light and dark read the same as in a story. */
+.docs-story {
+  background-color: var(--canvas);
+}

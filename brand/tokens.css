@@ -1,0 +1,250 @@
+/* The brand, as CSS. Every app imports this after `@import 'tailwindcss'` and
+   before the library's other sheets (src/styles.css, then an area's own). It
+   imports none of them: Tailwind's import inliner does not dedupe, so a shared
+   import here would emit twice.
+
+   The utilities at the bottom are here, not beside a component, because an
+   app uses all four in its own markup and must not need a component's sheet
+   to get them. */
+@import './brand.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tailwind colour names → the semantic tokens in brand.css.
+   `inline` matters: it makes `bg-accent` compile to `var(--accent)` instead of
+   a `:root`-pinned `var(--color-accent)`, which is what lets a `chat-theme-*`
+   class re-theme any subtree — including the widget's shadow root. */
+@theme inline {
+  /* surfaces */
+  --color-canvas: var(--canvas);
+  --color-panel: var(--panel);
+  --color-panel-solid: var(--panel-solid);
+  --color-line: var(--line);
+  --color-rail: var(--rail);
+  --color-scrim: var(--scrim);
+
+  /* text */
+  --color-ink-strong: var(--ink-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+
+  /* neutral wash + sunken surfaces */
+  --color-tint: var(--tint);
+  --color-code: var(--code);
+  --color-code-block: var(--code-block);
+
+  /* accent */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-highlight: var(--highlight);
+
+  /* brand */
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-fg-hover: var(--brand-fg-hover);
+  --color-brand-solid: var(--brand-solid);
+  --color-on-brand-solid: var(--on-brand-solid);
+  /* The composer's primary button only — see --action in brand.css §1. */
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-chip: var(--chip);
+  --color-chip-hover: var(--chip-hover);
+  --color-chip-fg: var(--chip-fg);
+  --color-bubble: var(--bubble);
+  --color-on-bubble: var(--on-bubble);
+  --color-on-orb: var(--on-orb);
+
+  /* status */
+  --color-notify: var(--notify);
+  --color-on-notify: var(--on-notify);
+  --color-marker: var(--marker);
+  --color-on-marker: var(--on-marker);
+  --color-caution: var(--caution);
+  --color-caution-surface: var(--caution-surface);
+  --color-caution-line: var(--caution-line);
+  --color-syntax-string: var(--syntax-string);
+  --color-success: var(--success);
+  --color-success-fg: var(--success-fg);
+  --color-success-surface: var(--success-surface);
+  --color-success-line: var(--success-line);
+  --color-on-success: var(--on-success);
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-fg-soft: var(--danger-fg-soft);
+  --color-danger-solid: var(--danger-solid);
+  --color-danger-solid-hover: var(--danger-solid-hover);
+  --color-on-danger-solid: var(--on-danger-solid);
+  --color-pill-green-fg: var(--pill-green-fg);
+  --color-pill-green-surface: var(--pill-green-surface);
+  --color-pill-green-line: var(--pill-green-line);
+  --color-pill-orange-fg: var(--pill-orange-fg);
+  --color-pill-orange-surface: var(--pill-orange-surface);
+  --color-pill-orange-line: var(--pill-orange-line);
+  --color-pill-yellow-fg: var(--pill-yellow-fg);
+  --color-pill-yellow-surface: var(--pill-yellow-surface);
+  --color-pill-yellow-line: var(--pill-yellow-line);
+  --color-pill-red-fg: var(--pill-red-fg);
+  --color-pill-red-surface: var(--pill-red-surface);
+  --color-pill-red-line: var(--pill-red-line);
+
+  /* raw ramps — escape hatch; components should prefer the names above */
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+  --color-accent-300: var(--accent-300);
+  --color-accent-400: var(--accent-400);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+}
+
+/* Not brand-owned: motion is shared by every theme. */
+@theme {
+  --font-sans: 'Nunito Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Architectural radius family. Component chrome uses these semantic steps;
+     `rounded-full` is reserved for geometry that must remain circular (avatars,
+     radios, switches, dots and circular icon actions). */
+  --radius-check: 4px;
+  --radius-control: 7px;
+  --radius-surface: 10px;
+  --radius-dialog: 14px;
+
+  --animate-orb-drift: orb-drift 9s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes orb-drift {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-7px) rotate(6deg);
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% center;
+    }
+    to {
+      background-position: -200% center;
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: var(--font-brand);
+    background-color: var(--canvas);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--selection);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  }
+
+  /* The rail down the inside of a turn — reasoning text, tool payloads, the
+     trace timeline, and markdown blockquotes. Indented content is the turn's
+     interior; anything flush with the message speaks to the reader instead.
+     Shared here rather than as a class string so the four call sites can't
+     drift, and so the 7px offset is stated once. Callers add their own
+     margin-top and padding-left (which forks on compact). */
+  .turn-rail {
+    margin-left: 7px;
+    border-left: 2px solid var(--rail);
+  }
+
+  /* Where a failed turn's rail runs out. The fade carries the meaning — a
+     dropped stream trails off rather than being cut — so it ends in
+     transparency instead of stopping flat. Callers set the height. */
+  .turn-rail-end {
+    margin-left: 7px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--danger), transparent);
+  }
+
+  /* The logo mark. `rgb(from … / 0)` fades each stop out through its own hue
+     rather than through `transparent` (which is transparent *black* and would
+     leave a grey fringe). */
+  .orb {
+    background:
+      radial-gradient(
+        circle at 32% 28%,
+        color-mix(in srgb, var(--orb-sheen) 90%, transparent) 0%,
+        rgb(from var(--orb-sheen) r g b / 0) 34%
+      ),
+      radial-gradient(circle at 70% 25%, var(--orb-1) 0%, rgb(from var(--orb-1) r g b / 0) 45%),
+      radial-gradient(circle at 28% 70%, var(--orb-2) 0%, rgb(from var(--orb-2) r g b / 0) 55%),
+      radial-gradient(circle at 75% 78%, var(--orb-3) 0%, rgb(from var(--orb-3) r g b / 0) 62%),
+      radial-gradient(circle at 50% 50%, var(--orb-core-from) 0%, var(--orb-core-to) 78%);
+    box-shadow:
+      inset 0 -6px 14px color-mix(in srgb, var(--orb-shade) 35%, transparent),
+      inset 0 4px 10px color-mix(in srgb, var(--orb-sheen) 50%, transparent),
+      0 10px 30px var(--orb-glow);
+  }
+
+  .shimmer-text {
+    background: linear-gradient(
+      90deg,
+      var(--ink-soft) 35%,
+      var(--ink-strong) 50%,
+      var(--ink-soft) 65%
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: var(--animate-shimmer);
+  }
+}

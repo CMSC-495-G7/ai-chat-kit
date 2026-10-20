@@ -1,0 +1,84 @@
+/* Own the calendar skin: no vendor palette or stylesheet leaks into the host. */
+.ui-date-picker .react-datepicker {
+  width: 100%;
+  font-family: var(--font-brand);
+  color: var(--ink);
+  font-size: 13px;
+}
+.ui-date-picker .react-datepicker__month-container {
+  width: 100%;
+}
+.ui-date-picker .react-datepicker__day-names,
+.ui-date-picker .react-datepicker__week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.ui-date-picker .react-datepicker__day-name,
+.ui-date-picker .react-datepicker__day {
+  display: grid;
+  place-items: center;
+  min-height: 38px;
+  margin: 1px 0;
+}
+.ui-date-picker .react-datepicker__day-name {
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+.ui-date-picker .react-datepicker__day {
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+.ui-date-picker .react-datepicker__day:hover {
+  background: color-mix(in srgb, var(--tint) 8%, transparent);
+}
+.ui-date-picker .react-datepicker__day--outside-month {
+  color: var(--ink-soft);
+}
+.ui-date-picker .react-datepicker__day--today {
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ui-date-picker .react-datepicker__day--in-range,
+.ui-date-picker .react-datepicker__day--in-selecting-range {
+  background: var(--chip);
+  color: var(--chip-fg);
+  border-radius: 0;
+}
+.ui-date-picker .react-datepicker__day--selected,
+.ui-date-picker .react-datepicker__day--range-start,
+.ui-date-picker .react-datepicker__day--range-end,
+.ui-date-picker .react-datepicker__day--selecting-range-start,
+.ui-date-picker .react-datepicker__day--selecting-range-end {
+  background: var(--brand-solid);
+  color: var(--on-brand-solid);
+  border-radius: var(--radius-control);
+}
+.ui-date-picker .react-datepicker__day--selected:hover,
+.ui-date-picker .react-datepicker__day--range-start:hover,
+.ui-date-picker .react-datepicker__day--range-end:hover {
+  background: var(--brand-fg-hover);
+  color: var(--on-brand-solid);
+}
+.ui-date-picker .react-datepicker__day--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ui-date-picker .react-datepicker__day--disabled:hover {
+  background: transparent;
+}
+.ui-date-picker .react-datepicker__sr-only,
+.ui-date-picker .react-datepicker__aria-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (pointer: coarse) {
+  .ui-date-picker .react-datepicker__day {
+    min-height: 44px;
+  }
+}

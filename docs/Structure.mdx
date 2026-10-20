@@ -1,0 +1,262 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Docs/Structure" />
+
+# Structure
+
+## The tiers
+
+| Tier         | What belongs there                                                                                                                                    | May import                       |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `primitives` | One control or one visual atom. Props in, events out, no data shape of its own.                                                                       | `hooks`, `lib`, other primitives |
+| `components` | Primitives assembled to do one job, with a data contract (rows, groups, tenants). No routing, no fetching, no sample data.                            | `primitives`, other components   |
+| `chat`       | Components and recipes that only make sense in a conversation, plus `engine/` for logic with no UI. Recipes are screens on sample data, stories only. | the generic tiers                |
+
+Two rules follow from the table. Generic code never imports from `chat/`. And
+a component never knows about a router: a link takes `href`
+plus an optional `onNavigate`, so the host decides how navigation happens.
+
+## One folder per module
+
+Every component is one folder, and the folder is the unit you copy when a
+component moves somewhere else.
+
+```
+src/primitives/date-picker/
+├── index.ts                  public surface — the only file other modules import
+├── types.ts                  the contract: props, unions, JSDoc on every field
+├── date-picker.tsx           the implementation
+├── date-picker.stories.tsx   scenarios — Storybook reads this, an app never does
+├── date-picker.e2e.ts        behaviour in a browser — Playwright drives the stories above
+├── date-picker.test.tsx      optional — unit tests, run by Vitest in jsdom
+├── date-value.ts             module-private helpers, when the logic earns a file
+└── date-picker.css           optional — only when Tailwind utilities can't say it
+```
+
+| File                 | Required | Rule                                                                                                                                                                                                                                                            |
+| -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.ts`           | yes      | Re-exports the component(s) and their types. Nothing else imports deep paths.                                                                                                                                                                                   |
+| `types.ts`           | yes      | Props live here, not in the `.tsx`. The JSDoc on each prop **is** the documentation — the Controls table and autodocs read it verbatim, as Markdown, so wrap JSX in backticks or it renders as a tag.                                                           |
+| `<name>.tsx`         | yes      | Imports its own types from `./types`. Named export, no default.                                                                                                                                                                                                 |
+| `<name>.stories.tsx` | yes      | Scenarios for every state worth looking at. Imports the component from `./<name>` and other modules by relative path.                                                                                                                                           |
+| `<name>.e2e.ts`      | yes      | What the component does, checked in a browser against its own stories: roles and names, keyboard, focus, the states that matter. See "Testing" below.                                                                                                           |
+| `<name>.test.tsx`    | no       | Unit tests: the component rendered on its own, or a helper's logic. A helper file with logic worth testing alone gets `<helper>.test.ts` beside it.                                                                                                             |
+| `<name>.css`         | no       | Most modules need none: styling is Tailwind on brand tokens. When utilities can't express it — a vendor widget's internals, a `::-webkit-slider-thumb` — scope every rule under the module's root class and `@import` the sheet at the top of `src/styles.css`. |
+| `<name>.example.tsx` | no       | A host component only stories render — a parent that owns state the primitive deliberately doesn't. Not exported from `index.ts`.                                                                                                                               |
+| `<name>.mdx`         | no       | Only when a module is a **contract** more than a component. Attach it with `<Meta of={Stories} />` and leave `autodocs` off that meta.                                                                                                                          |
+
+A component with no props (`ThemeToggle`, `AmbientGlow`) has no `types.ts`,
+because there is nothing to put in it.
+
+## Sub-components
+
+When a module is made of more than one component, each secondary one gets its
+own folder inside the module, in the same shape one level down.
+
+```
+src/components/facet-filters/
+├── index.ts
+├── types.ts
+├── facet-filters.tsx
+├── facet-filters.stories.tsx
+├── facetRules.ts
+└── facet-group/              a sub-component
+    ├── index.ts
+    ├── types.ts              when it has props of its own
+    └── facet-group.tsx
+```
+
+The parent's `index.ts` decides whether a sub-component is public. A
+sub-component gets its own stories only when it is useful on its own; otherwise
+the parent's stories show it in place.
+
+## Writing a story file
+
+```tsx
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { fn } from 'storybook/test'
+import { Pill } from './pill'
+
+const meta = {
+  title: 'Primitives/Pill', // the sidebar path — it mirrors the folder
+  component: Pill,
+  tags: ['autodocs'], // generate the Docs page from types.ts
+  args: { children: 'Active', tone: 'brand' },
+} satisfies Meta<typeof Pill>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Playground: Story = {} // args-driven, all controls live
+export const Outline: Story = { args: { variant: 'outline' } }
+export const Closable: Story = { args: { onClose: fn() } } // fn() logs to the Actions panel
+```
+
+Conventions the existing stories follow:
+
+- **`Playground` first** when the component is args-driven, so the Controls panel is the first thing you reach.
+- **Controlled components get a stateful `render`.** A `Switch` whose `checked` never changes is a screenshot, not a story. Hold the state in the render function and forward to the `fn()` arg so Actions still logs it.
+- **A story is a state, named for the state** — `Loading`, `Empty`, `Failed`, `Held` — not `Example2`.
+- **At least three stories per component.** `tests/stories.e2e.ts` fails when a component has fewer.
+- **Simple first, then complex.** A primitive shows its variants and states. A component adds a story on realistic data. A recipe is the whole screen.
+- **Interactions go in `play`.** Card and DatePicker assert behaviour with `play` functions from `storybook/test`; they run every time the story renders.
+- **Relative imports only.** A story that imports the package barrel pulls every module into its chunk; `../button` pulls one.
+
+## Titles
+
+The `title` is the folder path in words:
+
+| Folder                          | Title                       |
+| ------------------------------- | --------------------------- |
+| `src/primitives/pill`           | `Primitives/Pill`           |
+| `src/components/facet-filters`  | `Components/FacetFilters`   |
+| `src/chat/components/composer`  | `Chat/Components/Composer`  |
+| `src/chat/recipes/conversation` | `Chat/Recipes/Conversation` |
+
+## Fixtures
+
+Sample data shared by several stories is plain data in the library's own types.
+It is never exported from an entry point.
+
+| Folder               | Holds                                                       |
+| -------------------- | ----------------------------------------------------------- |
+| `src/fixtures/`      | The facet corpus, the demo user, the sample custom palettes |
+| `src/chat/fixtures/` | Sources, highlights, traces, messages, canned turns         |
+
+## Testing
+
+Two kinds of test sit beside a module, and the file name says which runner
+owns it. Neither runner picks up the other's files.
+
+| File                                  | Runner     | Runs in                       | For                                                          |
+| ------------------------------------- | ---------- | ----------------------------- | ------------------------------------------------------------ |
+| `<name>.test.tsx`, `<helper>.test.ts` | Vitest     | jsdom, no build needed        | One component or function on its own: calls, roles, logic    |
+| `<name>.e2e.ts`                       | Playwright | Chromium, the built Storybook | Behaviour that needs a real browser: focus, layout, overlays |
+
+### Unit tests
+
+```tsx
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
+import { Switch } from './switch'
+
+describe('Switch', () => {
+  it('asks for the opposite value', async () => {
+    const onChange = vi.fn()
+    render(<Switch label="Web search" checked={false} onChange={onChange} />)
+    await userEvent.click(screen.getByRole('switch', { name: 'Web search' }))
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(true)
+  })
+})
+```
+
+- **Import what you use** — `describe`, `it`, `expect`, `vi` from `vitest`.
+  Globals are off, so a test file reads the same as any other module.
+- **`tests/unit-setup.ts` runs first.** It adds the `jest-dom` matchers
+  (`toBeDisabled`, `toHaveAccessibleName`), unmounts between tests, and gives
+  jsdom inert stand-ins for `matchMedia`, `ResizeObserver`,
+  `IntersectionObserver` and `scrollIntoView`.
+- **jsdom lays nothing out.** Assert roles, names, attributes and calls. What
+  depends on size, position, real focus order or a portalled overlay belongs in
+  the `.e2e.ts`.
+- **Logic with edge cases is the best target**: a parser, a reducer, a diff.
+  Test the helper directly (`palette.test.ts`) rather than through the
+  component that happens to call it.
+
+### Browser tests
+
+Every component has a `<name>.e2e.ts` beside it. These are Playwright tests
+that open the component's stories in a real browser, so a story is both the
+documentation and the fixture: if a state is worth testing, it is worth a
+story, and the other way round.
+
+```ts
+import { expect, test } from '../../../tests/story'
+
+test.describe('Switch', () => {
+  test('Space flips it from the keyboard', async ({ story, page }) => {
+    await story.open('primitives-switch--off') // the story's id
+    const toggle = page.getByRole('switch')
+    await toggle.focus()
+    await page.keyboard.press('Space')
+    await expect(toggle).toBeChecked()
+  })
+})
+```
+
+- **`story.open(id)`** loads one story and waits until it has rendered. The id
+  is the title and the export name, lower-cased and hyphenated; the address bar
+  in Storybook shows it. A second argument sets the toolbar:
+  `story.open(id, { mode: 'dark' })`.
+- **Find things the way a person does**: by role and name, not by class. A test
+  that cannot find a control by its name has usually found a real problem.
+- **Any error fails the test.** The `story` fixture collects uncaught
+  exceptions and console errors, whether or not the test was looking for one.
+- **Tests run with reduced motion on**, so nothing waits for an animation. It
+  also means the reduced-motion path is the one that is tested.
+- **A story that needs time** (a stream, a countdown) is driven with
+  `page.clock`, not with a sleep.
+
+`tests/stories.e2e.ts` covers the library as a whole from Storybook's index:
+every story renders without an error, and every component has at least three
+stories. A new story is covered the moment it is added.
+
+## Checking your work
+
+```sh
+npm run typecheck          # the library alone, then everything with the stories
+npm run lint
+npm test                   # the unit tests (Vitest); `npm run test:watch` reruns on save
+npx vitest run src/primitives/tabs          # one module's unit tests
+npm run build-storybook    # the browser tests and screenshots run against this build
+npm run test:e2e           # every Playwright test
+npm run test:e2e:components                 # only the tests beside components
+npx playwright test src/primitives/tabs     # one component
+npm run test:e2e:ui        # Playwright's own UI, for watching a test run
+```
+
+To check that a change did not alter how anything looks, screenshot every
+story before and after and compare:
+
+```sh
+npm run build-storybook && node scripts/story-screenshots.mjs storybook-static .screenshots/baseline
+# make the change
+npm run build-storybook && npm run screenshots && npm run screenshots:compare
+```
+
+## Chat compositions
+
+`chat/components/conversation`, `chat-menu`, and `greeting` accept host copy and
+controlled data. Demo responders, facet lookups, personas, and settings state
+live in fixtures or recipes.
+
+### A simulated network for the chat recipes
+
+The chat recipes have stories that stream over the real WebSocket responder
+with no server behind it. `createWsResponder(url, connect)` takes the function
+that opens its socket; `chat/recipes/shared/simulatedNetwork.ts` supplies one
+that answers from a script in the wire protocol, so everything past the socket
+is the code an app runs. Nothing leaves the page.
+
+| Story                | What the connection does                                        |
+| -------------------- | --------------------------------------------------------------- |
+| `Healthy server`     | Answers promptly. The prompt picks the script (see below).      |
+| `Slow connection`    | 2.5s to connect, then a quarter speed.                          |
+| `Server unreachable` | Every connection is refused.                                    |
+| `Retry succeeds`     | Every other connection is refused, so the first Retry connects. |
+| `Connection drops`   | Closes partway through the answer, without an error.            |
+
+`Chat/Recipes/Conversation` has all five. The full chat app and the widget each
+have two, and every one of them has a `network`
+control: change it in the Controls panel and the next question meets the new
+connection.
+
+On a healthy server, a keyword in the prompt chooses what the server does:
+`market` runs tool calls, `quote` has a tool
+fail and the model work around it, `degraded` reports problems with a good
+answer, `error` has the server give up mid-answer, and `draw` streams diagrams.
+The scripts are in `chat/fixtures/wireScenarios.ts`.
+
+The simulation uses timers and nothing random, so a browser test installs
+`page.clock` before opening the story and decides how much time passes.

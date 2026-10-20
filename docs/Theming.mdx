@@ -1,0 +1,100 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Docs/Theming" />
+
+# Theming
+
+Two ways to put a brand on the kit. Both feed the same tokens in
+`brand/brand.css`, so light and dark mode follow either way.
+
+| Way                   | What you write              | Good for                                  |
+| --------------------- | --------------------------- | ----------------------------------------- |
+| A shipped theme class | `chat-theme-deep` on `html` | The hand-tuned palettes in brand.css      |
+| A custom palette      | `{ brand: '#0f766e' }`      | A tenant's own colours, picked at runtime |
+
+## Custom palettes
+
+`createPalette` takes a few seed colours and returns the CSS variables a theme
+block in brand.css declares: an 11-step brand ramp, the accent and warm ramps,
+and the light and dark surfaces and inks.
+
+```ts
+import { createPalette, checkPalette } from 'ai-chat-kit'
+
+const teal = { brand: '#0f766e' }
+createPalette(teal) // { '--brand-50': '#…', …, '--canvas-dark': '#…' }
+checkPalette(teal).filter((c) => !c.ok) // [] — every pair clears its bar
+```
+
+| Seed        | Default                  | What it colours                                             |
+| ----------- | ------------------------ | ----------------------------------------------------------- |
+| `brand`     | required                 | Solid fills, the user bubble, links, chips, the canvas tint |
+| `accent`    | `brand`                  | Focus rings, accent text, selection                         |
+| `warm`      | the shipped ember orange | The orb, the dark-mode send button, the highlight           |
+| `danger`    | the shipped red          | Error states                                                |
+| `surfaces`  | `'tinted'`               | `'neutral'` drops the brand hue out of the dark canvas      |
+| `anchor`    | `'auto'`                 | Which step the seed sits on; `600` pins it exactly          |
+| `font`      | Nunito Sans              | Body font stack (load the font yourself)                    |
+| `overrides` | none                     | Any other variable, set last                                |
+
+The ramps reuse the default theme's lightness table, so a palette lands near
+the shipped contrast ratios whatever its hue. The steps that carry text, or
+sit behind a white glyph, are nudged until they clear 4.5:1. Pass the default
+blue (`#004c97`) and you get the shipped ramp back to within a shade.
+
+`checkPalette` measures the pairs that matter most and returns each with its
+ratio. Run it on any palette a tenant supplies. A pinned `anchor` or an
+`overrides` entry can put a colour anywhere, and the check is what tells you.
+
+### In a full-page app
+
+```tsx
+import { usePalette } from 'ai-chat-kit'
+
+function App() {
+  usePalette({ brand: tenant.brandColor }) // on <html>, undone on unmount
+  return <Chat />
+}
+```
+
+`applyPalette(element, input)` is the same thing without React, and returns
+an undo function. To avoid a flash of the default colours on first load,
+render the rule into the page head on the server instead:
+
+```ts
+import { paletteCss } from 'ai-chat-kit'
+const css = paletteCss({ brand: '#0f766e' }, ':root')
+```
+
+### In the widget
+
+The widget lives in a shadow root, so nothing on the host page can reach it.
+Pass the palette when you mount it, and change it later through the handle:
+
+```ts
+const widget = mountWidget(content, { cssText, palette: { brand: '#0f766e' } })
+widget.setPalette({ brand: '#7c3aed', warm: '#7c3aed' })
+widget.setPalette(null) // back to themeClass, or the default
+```
+
+A script-tag embed can pass seeds as data attributes:
+`data-brand="#0f766e" data-warm="#0f766e"` (see
+`chat/recipes/widget-on-host-page/widget/demoWidget.tsx`).
+
+### In a palette picker
+
+`paletteOption` turns a custom palette into a `PalettePicker` tile, so tenants'
+palettes can sit beside the shipped ones. `usePaletteChoice` applies whichever
+one is picked: a class for a shipped option, inline variables for a custom one.
+
+```tsx
+const options = [
+  ...SHIPPED_PALETTES,
+  paletteOption({ id: 'teal', label: 'Teal', palette: { brand: '#0f766e' } }),
+]
+usePaletteChoice(options, chosenId)
+```
+
+The Storybook toolbar's **Teal (custom)**, **Plum (custom)** and **Crimson
+(custom)** palettes are built this way, and so are the three extra tiles in
+**Chat / Recipes / Settings dialogs**. **Brand / Custom palette** lets you try seeds live.

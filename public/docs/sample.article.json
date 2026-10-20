@@ -1,0 +1,64 @@
+{
+  "title": "Sample knowledge article",
+  "summary": "A placeholder for the article preview. Replace public/docs/sample.article.json with a real article in the same shape.",
+  "number": "000001004",
+  "type": "How-to",
+  "version": 7,
+  "publishedAt": "2026-06-21T21:11:02Z",
+  "fields": [
+    {
+      "name": "Product__c",
+      "label": "Product",
+      "kind": "text",
+      "value": "Treasury — Wires"
+    },
+    {
+      "name": "Audience__c",
+      "label": "Audience",
+      "kind": "text",
+      "value": "Internal"
+    },
+    {
+      "name": "Validated__c",
+      "label": "Validated",
+      "kind": "boolean",
+      "value": "true"
+    },
+    {
+      "name": "Review_Date__c",
+      "label": "Next review",
+      "kind": "date",
+      "value": "2026-12-01"
+    },
+    {
+      "name": "Question__c",
+      "label": "Question",
+      "kind": "text",
+      "value": "A client asks at 3:40 PM whether a $400,000 domestic wire can still go out today. What do I tell them, and what has to happen before the cut-off?"
+    },
+    {
+      "name": "Answer__c",
+      "label": "Answer",
+      "kind": "richText",
+      "value": "<p>Yes, if it is <b>fully approved by 4:00 PM ET</b>. A wire over $250,000 needs two approvers from different teams, so start the second approval now.</p>\n<h3>Cut-off times</h3>\n<table>\n  <thead><tr><th>Wire type</th><th>Submit by</th><th>Approvers</th></tr></thead>\n  <tbody>\n    <tr><td>Domestic, up to $250,000</td><td>4:30 PM ET</td><td>1</td></tr>\n    <tr><td>Domestic, over $250,000</td><td>4:00 PM ET</td><td>2</td></tr>\n    <tr><td>International</td><td>2:00 PM ET</td><td>2</td></tr>\n  </tbody>\n</table>\n<h3>Before you promise same-day</h3>\n<ol>\n  <li>Confirm the beneficiary details against the callback log.</li>\n  <li>Check that both approvers are <i>available</i>, not just assigned.</li>\n  <li>Tell the client the cut-off in <u>their</u> time zone.</li>\n</ol>\n<p><img alt=\"A wire goes from the initiator to an approver, then to the bank.\" src=\"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22360%22%20height%3D%2284%22%20font-family%3D%22Arial%22%20font-size%3D%2213%22%3E%3Crect%20x%3D%221%22%20y%3D%2222%22%20width%3D%22100%22%20height%3D%2240%22%20rx%3D%226%22%20fill%3D%22%23eef3fe%22%20stroke%3D%22%232f6fed%22%2F%3E%3Ctext%20x%3D%2251%22%20y%3D%2247%22%20text-anchor%3D%22middle%22%20fill%3D%22%232f6fed%22%3EInitiator%3C%2Ftext%3E%3Crect%20x%3D%22130%22%20y%3D%2222%22%20width%3D%22100%22%20height%3D%2240%22%20rx%3D%226%22%20fill%3D%22%23eef3fe%22%20stroke%3D%22%232f6fed%22%2F%3E%3Ctext%20x%3D%22180%22%20y%3D%2247%22%20text-anchor%3D%22middle%22%20fill%3D%22%232f6fed%22%3EApprover%3C%2Ftext%3E%3Crect%20x%3D%22259%22%20y%3D%2222%22%20width%3D%22100%22%20height%3D%2240%22%20rx%3D%226%22%20fill%3D%22%232f6fed%22%2F%3E%3Ctext%20x%3D%22309%22%20y%3D%2247%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3EBank%3C%2Ftext%3E%3Cpath%20d%3D%22M103%2042h23m-6-5%206%205-6%205M232%2042h23m-6-5%206%205-6%205%22%20fill%3D%22none%22%20stroke%3D%22%2352606d%22%20stroke-width%3D%221.5%22%2F%3E%3C%2Fsvg%3E\"></p>\n<p><span style=\"color: rgb(194, 57, 52);\"><b>Missed the window?</b></span> The wire is queued for the next business day. It is not cancelled, and the client is not charged twice.</p>\n<p>The full policy is in the <a href=\"https://library.example.com/policies/wires\">wire approval runbook</a>.</p>"
+    },
+    {
+      "name": "Policy_Link__c",
+      "label": "Policy",
+      "kind": "link",
+      "value": "https://library.example.com/policies/wires"
+    },
+    {
+      "name": "Last_Verified__c",
+      "label": "Last verified",
+      "kind": "dateTime",
+      "value": "2026-06-18T14:30:00Z"
+    },
+    {
+      "name": "Internal_Notes__c",
+      "label": "Internal notes",
+      "kind": "text",
+      "value": null
+    }
+  ]
+}

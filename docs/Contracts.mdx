@@ -1,0 +1,133 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Docs/Contracts" />
+
+# Contracts
+
+The seams where the UI meets something it does not own. Each is a small type a
+host implements once; the components on the other side never change. Component
+props are documented on each module's Docs page (generated from its `types.ts`);
+this page covers the contracts that span modules.
+
+---
+
+## `Responder` — where answers come from
+
+`src/chat/engine/chatEngine.ts`
+
+```ts
+type Responder = (prompt: string, signal: AbortSignal) => AsyncGenerator<ChatEvent>
+
+type ChatEvent =
+  | { type: 'thinking'; delta: string }
+  | { type: 'thinking-done'; fullText?: string }
+  | { type: 'content'; delta: string }
+  | { type: 'tool'; toolCall: ToolCall }
+  | { type: 'sources'; sources: Source[]; highlights?: Highlight[] }
+  | { type: 'followups'; items: string[] }
+  | { type: 'error'; fault: TurnFault; recoverable: boolean }
+  | { type: 'done'; fullText?: string; model?: string; tokens?: number; errors?: TurnFault[] }
+```
+
+- Deltas carry their own whitespace; the consumer concatenates verbatim.
+- Emit `sources` **before** the content that cites them, so `[n]` markers are clickable the moment they stream in.
+- A recoverable `error` puts a fault on the turn's trace and the answer carries on (`status: 'recovered'`). A fatal one ends the turn; only then does `Message.error` get set.
+- Aborting the `signal` is a cancel. Never throw — report failures as `error` events so they render in the conversation.
+
+Shipped: `createCannedResponder(turns)` (the stories and the demo), `createWsResponder(url)` (any WebSocket server that speaks the wire protocol in `chat/engine/wsProtocol.ts`). **Chat / Recipes / Conversation** runs `useChat` on the canned one; swapping in your own is one line.
+
+---
+
+## `Message` — one turn, as the transcript records it
+
+`src/chat/engine/types.ts`. `useChat` builds these from `ChatEvent`s;
+`ChatMessage` renders one. Every visual state in **Chat / Components / ChatMessage**
+is a different `Message`:
+
+| State           | Fields                                                                              |
+| --------------- | ----------------------------------------------------------------------------------- |
+| Thinking        | `thinkingActive: true`, `content: ''`                                               |
+| Streaming       | `streaming: true` (compare to `false`, not falsy — `undefined` means _not started_) |
+| Done            | `streaming: false`, optional `followups`, `trace.status: 'ok'`                      |
+| Recovered       | `trace.status: 'recovered'` with a `fault` step — no `error`                        |
+| Stopped         | `stopped: true`, partial `content` kept                                             |
+| Failed          | `error: TurnFault`, `trace.status: 'failed'`                                        |
+| Scoped question | `role: 'user'`, `askedOver: AskedOverScope` — a snapshot, never recomputed          |
+
+---
+
+## Facet filters — given, never fetched
+
+`src/components/facet-filters/types.ts`
+
+`FacetFilters` fetches nothing, counts nothing and stores nothing. The host
+owns `selection: Record<groupKey, string[]>` and answers the component's
+callbacks:
+
+| Callback                             | The host…                                                       |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `onSelectionChange(next)`            | stores it, refetches counts                                     |
+| `onSearchGroup(key, query)`          | replaces that lookup group's `values` with matches              |
+| `onLoadMore(key)` / `onLoadAll(key)` | appends a page / everything left                                |
+| `onAddQuery(q)`                      | stores a predicate chip instead of enumerating thousands of ids |
+
+A `count` of `null` means _unknown_ and renders as an em dash — a zero is a
+claim, an unknown is not. `src/fixtures/facets.ts` is a
+complete in-memory host, and the story that uses it is the reference
+implementation.
+
+---
+
+## Links — `href`, and the host decides
+
+`src/primitives/link`
+
+No component imports a router. Anything that navigates takes an `href`, so
+open-in-new-tab and copy-link keep working, plus an optional `onNavigate(href,
+event)`. A host with a client-side router prevents the default there and pushes
+the route; a host without one passes nothing and gets ordinary links.
+
+---
+
+## Navigation
+
+Import `Link`, `ButtonLink`, and `NavigateProvider` from `ai-chat-kit`.
+Anchors keep their `href`; a plain click calls the supplied navigation handler.
+The host prevents the default action when it handles navigation. Modified clicks
+keep native browser behavior.
+
+`AccountMenu` accepts a user, action items, and an optional footer; choose its
+`avatar` or `row` trigger. `SideDialog` uses a native modal dialog for focus
+trapping and Escape. `SlideOver` owns keyboard focus inside a contained drawer
+and returns focus to its trigger.
+
+## `PaletteInput` — a brand from seed colours
+
+`src/lib/palette/palette.ts`
+
+```ts
+type PaletteInput = {
+  brand: string // the only required seed, as hex
+  accent?: string // defaults to brand
+  warm?: string // defaults to the shipped ember orange
+  danger?: string
+  surfaces?: 'tinted' | 'neutral'
+  anchor?: 'auto' | RampStep
+  font?: string
+  displayFont?: string
+  overrides?: Record<string, string>
+}
+```
+
+`createPalette` turns it into the tier-1 variables a brand.css theme declares.
+The widget takes it as the `palette` mount option; an app applies it with
+`usePalette` or `applyPalette`. See [Theming](?path=/docs/docs-theming--docs).
+
+---
+
+## Card icon tone
+
+`Card` uses the shared `IconTile` with the selected muted neutral treatment. The
+optional `iconTone="warning"` uses gold `caution` tokens for a genuine warning.
+The icon remains decorative; the heading and copy explain the condition. Icon
+colour is never inferred from the SVG, and the rest of the card stays neutral.
