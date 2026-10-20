@@ -3,6 +3,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 type UseStickToBottomOptions = {
   /** How close to the bottom (in px) still counts as "at the bottom". */
   threshold?: number
+  /**
+   * Off, growth is not followed and the region rests at its top. For an
+   * empty state that reads top-down — a greeting taller than a phone screen
+   * would otherwise open scrolled past its own first line. Defaults to on.
+   */
+  enabled?: boolean
 }
 
 /**
@@ -42,13 +48,24 @@ function jumpToBottom(el: HTMLElement) {
 /** How long a smooth jump gets before following resumes — see scrollToBottom. */
 const SMOOTH_SETTLE_MS = 600
 
-export function useStickToBottom({ threshold = 120 }: UseStickToBottomOptions = {}) {
+export function useStickToBottom({
+  threshold = 120,
+  enabled = true,
+}: UseStickToBottomOptions = {}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [atBottom, setAtBottom] = useState(true)
   // Mirrors `atBottom` for the ResizeObserver callback below, which must read
   // the latest value without depending on (and re-subscribing over) it.
   const atBottomRef = useRef(true)
+
+  // Same for `enabled`. Switching off also returns the region to its top, so
+  // starting over shows the empty state from its first line.
+  const enabledRef = useRef(enabled)
+  useEffect(() => {
+    enabledRef.current = enabled
+    if (!enabled && containerRef.current) containerRef.current.scrollTop = 0
+  }, [enabled])
 
   const isNearBottom = useCallback(() => {
     const el = containerRef.current
@@ -132,7 +149,7 @@ export function useStickToBottom({ threshold = 120 }: UseStickToBottomOptions = 
     const el = containerRef.current
     if (!content || !el) return
     const ro = new ResizeObserver(() => {
-      if (!atBottomRef.current || settlingRef.current) return
+      if (!enabledRef.current || !atBottomRef.current || settlingRef.current) return
       jumpToBottom(el)
       lastTopRef.current = el.scrollTop
     })

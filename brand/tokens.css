@@ -119,6 +119,15 @@
   --radius-dialog: 14px;
 
   --animate-orb-drift: orb-drift 9s ease-in-out infinite;
+  /* The face's two working states. Thinking drifts and blinks; answering
+     talks — the mouth opens and closes on an uneven beat — with a small bob
+     instead of the drift's tilt, which reads as a wobble mid-sentence. Every
+     keyframe list ends on the resting face, so reduced motion (which plays
+     each animation once, instantly) leaves the plain mark. */
+  --animate-orb-think: orb-drift 9s ease-in-out infinite, orb-blink 3.6s ease-in-out infinite;
+  /* At rest beside a name, the face only blinks: no drift to pull at the line. */
+  --animate-orb-blink: orb-blink 4.2s ease-in-out infinite;
+  --animate-orb-talk: orb-talk 0.9s ease-in-out infinite, orb-bob 1.8s ease-in-out infinite;
   --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-shimmer: shimmer 1.6s linear infinite;
 
@@ -129,6 +138,60 @@
     }
     50% {
       transform: translateY(-7px) rotate(6deg);
+    }
+  }
+  /* The eyes are the first background layer, the mouth the second (see .orb).
+     Each layer shrinks or grows about its own centre, so a blink closes the
+     eyes in place and talking opens the mouth without moving it. */
+  @keyframes orb-blink {
+    0%,
+    88%,
+    100% {
+      background-size:
+        100% 100%,
+        100% 100%;
+    }
+    93% {
+      background-size:
+        100% 12%,
+        100% 100%;
+    }
+  }
+  @keyframes orb-talk {
+    0%,
+    100% {
+      background-size:
+        100% 100%,
+        100% 100%;
+    }
+    20% {
+      background-size:
+        100% 100%,
+        90% 190%;
+    }
+    45% {
+      background-size:
+        100% 100%,
+        100% 115%;
+    }
+    65% {
+      background-size:
+        100% 100%,
+        94% 165%;
+    }
+    85% {
+      background-size:
+        100% 100%,
+        100% 125%;
+    }
+  }
+  @keyframes orb-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-1.5px);
     }
   }
   @keyframes fade-up {
@@ -214,24 +277,29 @@
     background: linear-gradient(to bottom, var(--danger), transparent);
   }
 
-  /* The logo mark. `rgb(from … / 0)` fades each stop out through its own hue
-     rather than through `transparent` (which is transparent *black* and would
-     leave a grey fringe). */
+  /* The logo mark: a face on a rounded brand tile. The tile colour comes from
+     the palette (--orb-fill); the eyes and smile are a fixed white drawing on
+     a 48-unit grid, scaled with the element, so one class works from 16px to
+     64px. The radius is a third of the side at every size; it is set here, so
+     don't add `rounded-full` to an element that carries `.orb`.
+
+     Eyes and mouth are separate layers so they can move on their own
+     (animate-orb-think blinks, animate-orb-talk talks). Each layer is
+     positioned at its own centre on the grid — the eyes at y 19/48, the
+     mouth at y 32.1/48 — which is the point it scales about. */
   .orb {
-    background:
-      radial-gradient(
-        circle at 32% 28%,
-        color-mix(in srgb, var(--orb-sheen) 90%, transparent) 0%,
-        rgb(from var(--orb-sheen) r g b / 0) 34%
-      ),
-      radial-gradient(circle at 70% 25%, var(--orb-1) 0%, rgb(from var(--orb-1) r g b / 0) 45%),
-      radial-gradient(circle at 28% 70%, var(--orb-2) 0%, rgb(from var(--orb-2) r g b / 0) 55%),
-      radial-gradient(circle at 75% 78%, var(--orb-3) 0%, rgb(from var(--orb-3) r g b / 0) 62%),
-      radial-gradient(circle at 50% 50%, var(--orb-core-from) 0%, var(--orb-core-to) 78%);
-    box-shadow:
-      inset 0 -6px 14px color-mix(in srgb, var(--orb-shade) 35%, transparent),
-      inset 0 4px 10px color-mix(in srgb, var(--orb-sheen) 50%, transparent),
-      0 10px 30px var(--orb-glow);
+    border-radius: 33.333%;
+    background-color: var(--orb-fill);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='15' y='14' width='5' height='10' rx='2.5' fill='%23fff'/%3E%3Crect x='28' y='14' width='5' height='10' rx='2.5' fill='%23fff'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M16.5 30.5Q24 37 31.5 30.5' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position:
+      50% 39.583%,
+      50% 66.875%;
+    background-size:
+      100% 100%,
+      100% 100%;
   }
 
   .shimmer-text {

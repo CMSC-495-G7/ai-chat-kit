@@ -45,3 +45,16 @@ test.describe('Widget on a host page with a custom palette', () => {
     expect(brand).toMatch(/^#[0-9a-f]{6}$/)
   })
 })
+
+test.describe('Widget greeting on a host page', () => {
+  test("with no starters, the empty panel offers today's suggestions", async ({ story, page }) => {
+    await story.open('chat-recipes-widget-on-a-host-page--alder-and-finch')
+    await page.getByRole('button', { name: /Ask Assistant/ }).click()
+    const panel = page.getByRole('dialog', { name: 'Assistant chat' })
+    await expect(
+      panel.getByRole('heading', { level: 2, name: /What are we working on\?/ }),
+    ).toBeVisible()
+    const offered = panel.getByRole('region', { name: 'Suggested for today' }).getByRole('button')
+    await expect(offered).toHaveCount(3)
+  })
+})

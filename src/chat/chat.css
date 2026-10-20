@@ -74,8 +74,8 @@
   /* The launcher's first-run label. Collapsed to a zero-width grid column and
      revealed on hover or focus — 0fr/1fr rather than a fixed width so it sizes
      to whatever label the host passes instead of clipping a longer one.
-     The sphere is NOT inside this, so it never moves: a label that pushed the
-     sphere would drop the hover that opened it, collapse, and chatter.
+     The mark is NOT inside this, so it never moves: a label that pushed the
+     mark would drop the hover that opened it, collapse, and chatter.
      Hover is gated on a real pointer — on touch :hover sticks after a tap and
      the label would never close again. Focus-visible is not optional: this
      label is the button's only visible name. */

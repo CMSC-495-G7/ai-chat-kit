@@ -142,10 +142,10 @@
      the fill, and 3.12-4.64:1 for the fill on the panels and canvases it can
      land on.
 
-     Where it overhangs the launcher sphere none of that applies — the sphere
-     is a gradient carrying this same warm hue, and the fill against its bloom
-     is 1.49:1. The badge carries a shadow for that edge rather than a border;
-     see ChatWidget.
+     Where it overhangs the launcher none of that applies — the badge sits on
+     the brand tile, and against a red brand the fill can come close to 1:1.
+     The badge carries a shadow for that edge rather than a border; see
+     ChatWidget.
 
      So don't "simplify" it back to var(--ember-600), and don't reach for a
      prettier orange without re-running both ratios. A theme that wants its own
@@ -218,21 +218,11 @@
   --shadow-menu: color-mix(in oklab, var(--brand-950) 20%, transparent);
   --shadow-deep: color-mix(in oklab, var(--brand-950) 25%, transparent);
 
-  /* the orb logo mark — five stacked radial gradients, see .orb in tokens.css.
-     Its two warm blooms come from --ember-*, which is deliberately NOT part of
-     the accent ramp: the mark is aria-hidden decoration, so it can carry a hue
-     that would never clear 4.5:1 as text. Keep it that way — a warm value
-     wanted for UI state gets its own contrast-checked token instead (see
-     --notify and --marker above, which are the only such cases). Themes that declare no
-     ember fall back to their accent. */
-  --orb-sheen: #ffffff;
-  --orb-1: var(--ember-300, var(--accent-300));
-  --orb-2: var(--ember-500, var(--accent-500));
-  --orb-3: var(--brand-500);
-  --orb-core-from: var(--brand-300);
-  --orb-core-to: var(--brand-600);
-  --orb-shade: var(--brand-950);
-  --orb-glow: color-mix(in srgb, var(--brand-600) 35%, transparent);
+  /* The logo mark — a white face on a brand tile, see .orb in tokens.css. The
+     face is white in both modes, so the tile has to hold white at 4.5:1: the
+     600 here (the solid-fill step, already held to that bar), the 500 in dark
+     (the user bubble's step, likewise). */
+  --orb-fill: var(--brand-600);
   --on-orb: #ffffff;
 }
 
@@ -251,6 +241,7 @@
   --canvas: var(--canvas-dark);
   --panel: var(--panel-dark);
   --panel-solid: var(--panel-solid-dark);
+  --orb-fill: var(--brand-500);
   --line: color-mix(in srgb, var(--brand-200) 14%, transparent);
   --canvas-glow-a: color-mix(in srgb, var(--brand-500) 16%, transparent);
   /* The one decorative warm note. Both blooms were the same blue, which is
@@ -406,8 +397,8 @@
   --accent-500: var(--brand-500);
   --accent-600: var(--brand-600);
   --accent-700: var(--brand-700);
-  /* The warm ramp. 300/500 are decoration — the orb's two blooms (--orb-1 /
-     --orb-2 in §1) and the activity count's fill; 600 is not, it backs the
+  /* The warm ramp. 300/500 are decoration — the canvas's warm glow and the
+     activity count's fill; 600 is not, it backs the
      demo shell's bookmark (--marker) behind a white label, so it is picked for
      contrast rather than for looks. */
   --ember-300: #ffb27a;
@@ -476,8 +467,8 @@
   --accent-500: var(--brand-500);
   --accent-600: var(--brand-600);
   --accent-700: var(--brand-700);
-  /* The warm ramp. 300/500 are decoration — the orb's two blooms (--orb-1 /
-     --orb-2 in §1) and the activity count's fill; 600 is not, it backs the
+  /* The warm ramp. 300/500 are decoration — the canvas's warm glow and the
+     activity count's fill; 600 is not, it backs the
      demo shell's bookmark (--marker) behind a white label, so it is picked for
      contrast rather than for looks. */
   --ember-300: #ffc48a;
@@ -532,8 +523,8 @@
   --accent-500: var(--brand-500);
   --accent-600: var(--brand-600);
   --accent-700: var(--brand-700);
-  /* The warm ramp. 300/500 are decoration — the orb's two blooms (--orb-1 /
-     --orb-2 in §1) and the activity count's fill; 600 is not, it backs the
+  /* The warm ramp. 300/500 are decoration — the canvas's warm glow and the
+     activity count's fill; 600 is not, it backs the
      demo shell's bookmark (--marker) behind a white label, so it is picked for
      contrast rather than for looks. */
   --ember-300: #ffb27a;
@@ -761,8 +752,8 @@
 
   --ember-300 / --ember-500 / --ember-600: …
                                           // optional, your warm hue. 300/500 are decoration:
-                                          //   the orb's two blooms, exempt from contrast rules
-                                          //   because the mark is aria-hidden — never reuse
+                                          //   the page's warm glow, exempt from contrast rules
+                                          //   because it is aria-hidden — never reuse
                                           //   those for text. 600 IS text-bearing (--marker),
                                           //   so pick it for ≥4.5:1 behind white. Omit the set
                                           //   to let both take your accent hue instead.

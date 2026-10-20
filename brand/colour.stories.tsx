@@ -93,7 +93,7 @@ export const Ramps: Story = {
       </Section>
       <Section
         title="Warm ramp"
-        note="Decoration only: the orb's two blooms. Never used for text, icons or state."
+        note="Decoration only: the canvas's warm glow and the activity count. Never used for text, icons or state."
       >
         <div className={row}>
           <Swatch token="ember-300" />

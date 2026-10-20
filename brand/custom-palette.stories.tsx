@@ -156,7 +156,7 @@ const meta = {
     accent: { control: 'color', description: 'The action hue. Empty uses brand.' },
     warm: {
       control: 'color',
-      description: 'The warm note (orb, dark send button). Empty keeps the shipped orange.',
+      description: 'The warm note (page glow, dark send button). Empty keeps the shipped orange.',
     },
     surfaces: { control: 'inline-radio', options: ['tinted', 'neutral'] },
     anchor: { control: 'inline-radio', options: ['auto', '600'] },
@@ -173,7 +173,7 @@ export const Playground: Story = {}
 export const Teal: Story = { args: { brand: '#0f766e' } }
 
 /** One hue everywhere: the warm note is the brand colour too, so there is no
- *  orange anywhere — not on the orb, not on the dark send button. */
+ *  orange anywhere — not in the page glow, not on the dark send button. */
 export const SingleHuePlum: Story = { args: { brand: '#7c3aed', warm: '#7c3aed' } }
 
 export const NeutralDark: Story = { args: { brand: '#be123c', surfaces: 'neutral' } }

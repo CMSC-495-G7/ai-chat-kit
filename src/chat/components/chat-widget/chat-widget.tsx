@@ -328,9 +328,9 @@ export function ChatWidget({
             </CitationsProvider>
           </div>
 
-          {/* Launcher. The sphere is pinned to the anchored edge and the label
+          {/* Launcher. The mark is pinned to the anchored edge and the label
               opens away from it, so the hover target never moves out from under
-              the cursor — a label that pushed the sphere would drop the hover
+              the cursor — a label that pushed the mark would drop the hover
               that opened it, collapse, and chatter. */}
           <div
             style={{ zIndex }}
@@ -370,17 +370,15 @@ export function ChatWidget({
                 </span>
               </span>
 
-              {/* Closed, the sphere carries no glyph — it is the mark, and
-                  anything drawn on it competes with its own highlight (a white
-                  chat icon measured 2.93:1 against the gradient beneath it).
-                  Open swaps it for a plain disc so the X has a ground of its
-                  own: a blue glyph on the orb itself lands ~1.9:1. That also
-                  reads correctly — the sphere has moved into the panel, and
-                  what is left is just a close. */}
+              {/* Closed, the launcher is the mark itself and carries no other
+                  glyph: the face already says "assistant", and an icon on top
+                  would fight it. Open swaps it for a plain disc so the X has a
+                  ground of its own. That also reads correctly — the assistant
+                  has moved into the panel, and what is left is just a close. */}
               <span
                 aria-hidden
-                className={`relative grid size-[50px] shrink-0 place-items-center rounded-full transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${
-                  open ? 'border border-line bg-panel-solid text-brand-fg' : 'orb'
+                className={`relative grid size-[50px] shrink-0 place-items-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${
+                  open ? 'rounded-full border border-line bg-panel-solid text-brand-fg' : 'orb'
                 }`}
               >
                 <span
@@ -398,15 +396,12 @@ export function ChatWidget({
                 only ever says "something's waiting", so it doesn't need to
                 update glyph-by-glyph as replies land while the panel is closed.
 
-                Separation from the orb is a shadow rather than a ring. It used
-                to be a 2px --panel-solid border, which worked by standing the
-                dot on a disc of panel colour — and that was doing more than it
-                looked: the dot overlaps the orb's top-right, exactly where its
-                warm bloom sits, and --notify against that bloom is 1.49:1.
-                Bare, the edge would dissolve into the sphere. A shadow
-                separates by darkening what is behind the rim instead, which
-                holds over a gradient the way a single flat border colour
-                cannot. */}
+                Separation from the mark is a shadow rather than a ring. The
+                dot overlaps the tile's top-right corner, and on a red brand
+                tile --notify can sit close to 1:1 against it, so a bare edge
+                would dissolve into the tile. A shadow separates by darkening
+                what is behind the rim, which holds on any brand colour
+                without standing the dot on a disc of panel colour. */}
             {unread > 0 && (
               <span
                 aria-hidden

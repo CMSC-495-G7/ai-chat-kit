@@ -108,7 +108,7 @@ export function ChatMenu({
         )}
         {/* The collapsed rail carries nothing but the hamburger: branding and
             the app name belong to the expanded sidebar, and a lone menu button
-            reads as "open me" far more plainly than an orb over a chevron. */}
+            reads as "open me" far more plainly than the mark over a chevron. */}
         <div
           className={`flex items-center gap-2.5 px-5 pt-5 pb-4 ${
             collapsed ? 'lg:justify-center lg:px-3' : ''
@@ -116,7 +116,7 @@ export function ChatMenu({
         >
           {!embedded && (
             <Orb
-              className={`orb block size-7 shrink-0 rounded-full ${collapsed ? 'lg:hidden' : ''}`}
+              className={`orb block size-7 shrink-0 ${collapsed ? 'lg:hidden' : ''}`}
               aria-hidden
             />
           )}

@@ -389,6 +389,12 @@ export const ArrowDownIcon = (p: IconProps) => (
   </svg>
 )
 
+export const ArrowRightIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M5 12h12M12.5 7.5 17 12l-4.5 4.5" />
+  </svg>
+)
+
 /** Two turns folded into one. */
 export const UndoIcon = (p: IconProps) => (
   <svg {...base(p)}>

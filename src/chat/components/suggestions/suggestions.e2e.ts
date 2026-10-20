@@ -39,4 +39,23 @@ test.describe('Suggestions', () => {
     expect(second.y).toBeGreaterThan(first.y)
     expect(second.x).toBe(first.x)
   })
+
+  test('as a list, each row is full width and carries its reason', async ({ story, page }) => {
+    await story.open('chat-components-suggestions--empty-state-list')
+    const region = page.getByRole('region', { name: 'Suggested for today' })
+    const rows = region.getByRole('button')
+    await expect(rows).toHaveCount(4)
+    await expect(
+      region.getByRole('button', { name: /^Which invoices are due this week\?/ }),
+    ).toContainText('Popular in your org')
+    const [row, column] = [(await rows.first().boundingBox())!, (await region.boundingBox())!]
+    expect(row.width).toBeGreaterThan(column.width * 0.95)
+  })
+
+  test('as a compact list, a row is the question alone', async ({ story, page }) => {
+    await story.open('chat-components-suggestions--empty-state-list-compact')
+    const region = page.getByRole('region', { name: 'Suggested for today' })
+    await expect(region.getByRole('button')).toHaveCount(3)
+    await expect(region).not.toContainText('Popular in your org')
+  })
 })

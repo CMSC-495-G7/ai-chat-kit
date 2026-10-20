@@ -85,7 +85,9 @@ export function ChatMessage({
   return (
     <div className={`flex animate-fade-up ${compact ? 'gap-2.5' : 'gap-3.5'}`}>
       <span
-        className={`orb mt-1 block shrink-0 rounded-full ${compact ? 'size-6' : 'size-7'} ${message.streaming || message.thinkingActive ? 'animate-orb-drift' : ''}`}
+        className={`orb mt-1 block shrink-0 ${compact ? 'size-6' : 'size-7'} ${
+          message.thinkingActive ? 'animate-orb-think' : message.streaming ? 'animate-orb-talk' : ''
+        }`}
         aria-hidden
       />
       <div className="min-w-0 flex-1 pt-0.5">
