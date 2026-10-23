@@ -64,6 +64,7 @@ export * from './components/mermaid-block'
 export * from './components/resizable-column'
 export * from './components/settings'
 export * from './components/side-dialog'
+export * from './components/side-menu'
 export * from './components/side-tabs'
 export * from './components/slide-over'
 
