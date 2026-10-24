@@ -4,6 +4,7 @@ import {
   useSimulatedResponder,
   type NetworkCondition,
 } from '../shared/simulatedNetwork'
+import { ChatInSideMenu } from './chat-in-side-menu'
 import App from './full-chat-app'
 
 // The full chat app, rendered as-is: sidebar, top bar, conversation, reference
@@ -21,6 +22,12 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+/**
+ * The chat docked in the side menu: the app rail on the left, and the chat's
+ * New chat, filters and history in the panel beside it.
+ */
+export const InSideMenu: Story = { render: () => <ChatInSideMenu /> }
 
 function OverTheWire({ network }: { network: NetworkCondition }) {
   return <App responder={useSimulatedResponder(network)} />

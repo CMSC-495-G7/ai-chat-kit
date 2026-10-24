@@ -84,5 +84,7 @@ export function useResizableWidth({ initial, min, max, storageKey, step = 16 }: 
     [min, max, step],
   )
 
-  return { width, dragging, onPointerDown, onKeyDown }
+  const reset = useCallback(() => setWidth(clamp(initial, min, max)), [initial, min, max])
+
+  return { width, dragging, onPointerDown, onKeyDown, reset }
 }
