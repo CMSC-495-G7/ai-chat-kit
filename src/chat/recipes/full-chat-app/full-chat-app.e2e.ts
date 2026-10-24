@@ -52,3 +52,21 @@ test.describe('Full chat app on canned turns', () => {
     await expect(page.getByText(/Page \d+ of \d+/)).toHaveCount(0)
   })
 })
+
+test.describe('Full chat app in the side menu', () => {
+  test('the chat adds its New chat and history to the rail’s panel', async ({ story, page }) => {
+    await story.open('chat-recipes-full-chat-app--in-side-menu')
+    const panel = page.getByRole('complementary', { name: 'Chat' })
+    await expect(page.getByRole('navigation', { name: 'Apps' })).toBeVisible()
+    await expect(panel.getByRole('button', { name: 'New chat' })).toBeVisible()
+  })
+
+  test('on a phone the rail opens over the page from a button', async ({ story, page }) => {
+    await page.setViewportSize({ width: 390, height: 780 })
+    await story.open('chat-recipes-full-chat-app--in-side-menu')
+    await expect(page.getByRole('navigation', { name: 'Apps' })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Open menu' }).click()
+    await expect(page.getByRole('navigation', { name: 'Apps' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'New chat' })).toBeVisible()
+  })
+})

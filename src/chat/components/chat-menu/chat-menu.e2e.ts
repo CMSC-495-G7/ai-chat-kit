@@ -40,10 +40,9 @@ test.describe('ChatMenu', () => {
     await expect(recent).toHaveAttribute('aria-expanded', 'true')
   })
 
-  test('embedded in the shell it drops the brand and the account menu', async ({ story, page }) => {
-    await story.open('chat-components-chat-menu--embedded')
+  test('with no history, Recent counts none', async ({ story, page }) => {
+    await story.open('chat-components-chat-menu--no-history')
     const menu = page.getByRole('complementary', { name: 'Chat menu' })
-    await expect(menu.getByRole('button', { name: /^Account:/ })).toHaveCount(0)
-    await expect(menu).toContainText('Chat')
+    await expect(menu.getByRole('button', { name: /^Recent/ })).toContainText('0')
   })
 })

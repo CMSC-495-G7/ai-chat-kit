@@ -33,4 +33,4 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Expanded: Story = {}
 export const Rail: Story = { args: { collapsed: true } }
-export const Embedded: Story = { args: { embedded: true } }
+export const NoHistory: Story = { args: { recentChats: [] } }

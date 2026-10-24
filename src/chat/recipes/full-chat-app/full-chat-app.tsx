@@ -5,7 +5,8 @@ import { SlideOver } from '../../../components/slide-over'
 import { useMediaQuery } from '../../../hooks/useMediaQuery'
 import { AmbientGlow } from '../../../primitives/ambient-glow'
 import { SlidersIcon, UserIcon } from '../../../primitives/icons'
-import { ChatMenu } from '../../components/chat-menu/chat-menu'
+import { ChatMenu, ChatMenuBody } from '../../components/chat-menu'
+import { InSideMenu } from '../../../components/side-menu'
 import { Conversation } from '../../components/conversation/conversation'
 import { Greeting } from '../../components/greeting'
 import { ReferencePanel, type ReferenceOriginalProps } from '../../components/reference-panel'
@@ -104,6 +105,18 @@ export function Chat({
     [messages, demo.flags],
   )
 
+  const facetProps = {
+    ...facets,
+    onSelectionChange: facets.setSelection,
+    onAddCustomFacet: facets.addCustomFacet,
+    onRemoveCustomFacet: facets.removeCustomFacet,
+    onAddQuery: facets.addQuery,
+    onRemoveQuery: facets.removeQuery,
+    onClearAll: facets.clearAll,
+    facetTypes: FACET_TYPES,
+    describeFacetType,
+  }
+
   const startNewChat = () => {
     reset()
     setChatMenuOpen(false)
@@ -121,60 +134,66 @@ export function Chat({
       }`}
     >
       <AmbientGlow />
-      <ChatMenu
-        appName={APP_NAME}
-        recentChats={recentChats}
-        facets={{
-          ...facets,
-          onSelectionChange: facets.setSelection,
-          onAddCustomFacet: facets.addCustomFacet,
-          onRemoveCustomFacet: facets.removeCustomFacet,
-          onAddQuery: facets.addQuery,
-          onRemoveQuery: facets.removeQuery,
-          onClearAll: facets.clearAll,
-          facetTypes: FACET_TYPES,
-          describeFacetType,
-        }}
-        account={{
-          user: { ...DEMO_USER, detail: DEMO_USER.email },
-          caption: DEMO_USER.plan,
-          items: [
-            {
-              id: 'user',
-              label: 'User settings',
-              hint: 'Profile and appearance',
-              icon: <UserIcon width={16} height={16} />,
-              onSelect: () => {
-                onOpenUserSettings?.()
-                setChatMenuOpen(false)
+      {/* In the platform shell the menu is the shell's: this page adds what only
+          it knows — the filters and the history — to the chat panel. On its own
+          the page frames the same body in a sidebar of its own. */}
+      {embedded ? (
+        <InSideMenu>
+          <ChatMenuBody
+            inset
+            recentChats={recentChats}
+            facets={facetProps}
+            onNewChat={startNewChat}
+          />
+        </InSideMenu>
+      ) : (
+        <ChatMenu
+          appName={APP_NAME}
+          recentChats={recentChats}
+          facets={facetProps}
+          account={{
+            user: { ...DEMO_USER, detail: DEMO_USER.email },
+            caption: DEMO_USER.plan,
+            items: [
+              {
+                id: 'user',
+                label: 'User settings',
+                hint: 'Profile and appearance',
+                icon: <UserIcon width={16} height={16} />,
+                onSelect: () => {
+                  onOpenUserSettings?.()
+                  setChatMenuOpen(false)
+                },
               },
-            },
-            {
-              id: 'features',
-              label: 'Feature toggles',
-              hint: 'What a response shows',
-              icon: <SlidersIcon width={16} height={16} />,
-              onSelect: () => {
-                onOpenFeatureToggles?.()
-                setChatMenuOpen(false)
+              {
+                id: 'features',
+                label: 'Feature toggles',
+                hint: 'What a response shows',
+                icon: <SlidersIcon width={16} height={16} />,
+                onSelect: () => {
+                  onOpenFeatureToggles?.()
+                  setChatMenuOpen(false)
+                },
               },
-            },
-          ],
-        }}
-        embedded={embedded}
-        open={sidebarOpen}
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed((v) => !v)}
-        onClose={() => setChatMenuOpen(false)}
-        onNewChat={startNewChat}
-      />
+            ],
+          }}
+          open={sidebarOpen}
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((v) => !v)}
+          onClose={() => setChatMenuOpen(false)}
+          onNewChat={startNewChat}
+        />
+      )}
 
       <CitationsProvider
         value={(sources, id, highlights) => setCitation({ sources, activeId: id, highlights })}
       >
         <main className="glass relative flex min-w-0 flex-1 overflow-hidden rounded-surface">
           <div className="flex min-w-0 flex-1 flex-col">
-            <TopBar onOpenSidebar={() => setChatMenuOpen(true)} showThemeToggle={!embedded} />
+            <TopBar
+              onOpenSidebar={embedded ? undefined : () => setChatMenuOpen(true)}
+              showThemeToggle={!embedded}
+            />
             <Conversation
               disclaimer={DISCLAIMER}
               greeting={<Greeting name="Joe" />}

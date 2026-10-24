@@ -495,3 +495,23 @@ export const BuildingIcon = (p: IconProps) => (
     <path d="M4 20h16M9.5 20v-4.5h5V20" />
   </svg>
 )
+
+export const AppsIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+  </svg>
+)
+
+export const HelpIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.5M12 16.6v.1" />
+  </svg>
+)
+
+export const PanelCollapseIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+    <path d="M9.5 4.5v15M16 10l-2 2 2 2" />
+  </svg>
+)
