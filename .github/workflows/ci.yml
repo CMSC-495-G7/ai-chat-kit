@@ -1,0 +1,47 @@
+# The same gates as the pre-commit and pre-push hooks, plus the unit tests, run
+# on every push to main and every pull request. A hook can be skipped with
+# --no-verify; this can't.
+#
+# The Playwright suites are left out for now: they need a Storybook build and
+# browser installs, which makes them the slowest and costliest thing to run here.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch or PR cancels the run it supersedes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # The hook script scans the staged diff, which CI doesn't have, so this
+      # scans the checked-out tree for the same three markers instead.
+      - name: No merge-conflict markers
+        run: |
+          if git grep -nE '^(<{7}|\|{7}|>{7}) '; then
+            echo "Merge conflict markers found in the files above."
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx oxlint --max-warnings=0
+      - run: npm run format:check
+      - run: npm test
