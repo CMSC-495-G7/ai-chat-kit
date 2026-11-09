@@ -3,5 +3,11 @@
 // alone before importing the optional development package.
 if (process.env.CI || process.env.NODE_ENV === 'production') process.exit(0)
 
-const husky = (await import('husky')).default
+let husky
+try {
+  husky = (await import('husky')).default
+} catch {
+  // Installed as another app's dependency, so no dev packages and no hooks.
+  process.exit(0)
+}
 console.log(husky())

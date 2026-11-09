@@ -1,8 +1,40 @@
 {
-  "name": "ai-chat-kit",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@radixp0int/ai-chat-kit",
+  "version": "0.1.0",
   "description": "A chat UI kit: brand tokens with swappable palettes, primitives, the chat components and an embeddable chat widget. Source-only; the app's Vite compiles it.",
+  "keywords": [
+    "ai",
+    "chat",
+    "react",
+    "tailwindcss",
+    "ui-kit",
+    "vite",
+    "widget"
+  ],
+  "homepage": "https://github.com/CMSC-495-G7/ai-chat-kit#readme",
+  "bugs": {
+    "url": "https://github.com/CMSC-495-G7/ai-chat-kit/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CMSC-495-G7/ai-chat-kit.git"
+  },
+  "files": [
+    "src",
+    "brand/tokens.css",
+    "brand/brand.css",
+    "brand/head.html",
+    "!src/**/*.stories.tsx",
+    "!src/**/*.e2e.ts",
+    "!src/**/*.e2e.ts-snapshots",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/**/*.example.tsx",
+    "!src/**/*.fixtures.ts",
+    "!src/**/fixtures",
+    "!src/**/recipes"
+  ],
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -14,7 +46,11 @@
     "./chat.css": "./src/chat/chat.css",
     "./widget.css": "./src/chat/components/chat-widget/widget.css",
     "./brand/tokens.css": "./brand/tokens.css",
-    "./brand/head.html": "./brand/head.html"
+    "./brand/head.html": "./brand/head.html",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006",
@@ -26,6 +62,7 @@
     "screenshots": "node scripts/story-screenshots.mjs storybook-static .screenshots/current",
     "screenshots:compare": "node scripts/compare-screenshots.mjs .screenshots/baseline .screenshots/current",
     "prepare": "node .husky/install.mjs",
+    "prepublishOnly": "npm run typecheck && oxlint --max-warnings=0 && npm test",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -66,8 +103,8 @@
     "oxfmt": "0.70.0",
     "oxlint": "^1.74.0",
     "playwright": "^1.63.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "storybook": "^10.6.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
@@ -75,8 +112,9 @@
     "vitest": "^5.0.3"
   },
   "peerDependencies": {
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs}": [

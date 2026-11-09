@@ -9,10 +9,17 @@ import type { DocumentRendererProps } from '../types'
 // one bundler-specific line in the folder: Vite turns it into an emitted file.
 // pdfjs-dist arrives with react-pdf; under a strict installer (pnpm) it has to
 // be a direct dependency too, at the version react-pdf pins.
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString()
+//
+// A host's setting wins. Installed from npm, this file is pre-bundled by the
+// host's Vite dev server, and there the URL below resolves next to this file
+// instead of into pdfjs-dist (production builds resolve it fine). The README
+// shows the three lines a host adds to set it itself.
+if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString()
+}
 
 /** `ratio` is the first page's height over its width; the rest are assumed to match. */
 type Sheets = { pages: number; ratio: number }

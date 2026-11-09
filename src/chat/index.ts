@@ -1,4 +1,4 @@
-// ai-chat-kit/chat — the chat area: engine, chat components and the
+// @radixp0int/ai-chat-kit/chat — the chat area: engine, chat components and the
 // embeddable widget. The generic tiers it builds on are the package root,
 // imported from there rather than re-exported here.
 

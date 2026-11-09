@@ -13,7 +13,7 @@ export type MountOptions = {
   /**
    * The whole stylesheet for the widget's shadow root, as text. A host that
    * renders no markup of its own inside the widget passes the library's:
-   * `import cssText from 'ai-chat-kit/widget.css?inline'`. One that does —
+   * `import cssText from '@radixp0int/ai-chat-kit/widget.css?inline'`. One that does —
    * side panels, say — compiles its own sheet that also covers that markup
    * (see widget.css). The host supplies it because only the host knows what
    * ends up inside the shadow root, and nothing outside it can style it.

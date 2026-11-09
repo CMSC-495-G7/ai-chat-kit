@@ -19,7 +19,7 @@ block in brand.css declares: an 11-step brand ramp, the accent and warm ramps,
 and the light and dark surfaces and inks.
 
 ```ts
-import { createPalette, checkPalette } from 'ai-chat-kit'
+import { createPalette, checkPalette } from '@radixp0int/ai-chat-kit'
 
 const teal = { brand: '#0f766e' }
 createPalette(teal) // { '--brand-50': '#…', …, '--canvas-dark': '#…' }
@@ -49,7 +49,7 @@ ratio. Run it on any palette a tenant supplies. A pinned `anchor` or an
 ### In a full-page app
 
 ```tsx
-import { usePalette } from 'ai-chat-kit'
+import { usePalette } from '@radixp0int/ai-chat-kit'
 
 function App() {
   usePalette({ brand: tenant.brandColor }) // on <html>, undone on unmount
@@ -62,7 +62,7 @@ an undo function. To avoid a flash of the default colours on first load,
 render the rule into the page head on the server instead:
 
 ```ts
-import { paletteCss } from 'ai-chat-kit'
+import { paletteCss } from '@radixp0int/ai-chat-kit'
 const css = paletteCss({ brand: '#0f766e' }, ':root')
 ```
 

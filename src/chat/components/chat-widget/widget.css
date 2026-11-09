@@ -1,7 +1,7 @@
 /* A complete stylesheet for the widget's shadow root, for a host that renders
    no markup of its own inside it. Pass it to mountWidget as `cssText`:
 
-     import cssText from 'ai-chat-kit/widget.css?inline'
+     import cssText from '@radixp0int/ai-chat-kit/widget.css?inline'
 
    A shadow root sees no page styles, so unlike the per-area sheets this one
    carries the whole chain itself. `source(none)` turns off Tailwind's scan of

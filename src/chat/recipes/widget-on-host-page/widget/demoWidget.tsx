@@ -9,7 +9,7 @@ import {
 } from '../../../components/chat-widget'
 import { createCannedResponder, type Responder } from '../../../engine/chatEngine'
 import { type SidePanel } from '../../../engine/types'
-// Not ai-chat-kit/widget.css: the side panels below render inside the
+// Not @radixp0int/ai-chat-kit/widget.css: the side panels below render inside the
 // shadow root, so this sheet also scans this folder. See widget.css.
 import { cannedTurns } from '../../../fixtures/cannedTurns'
 import { demoBranding } from '../../../fixtures/config'

@@ -44,19 +44,19 @@ Four globals, applied to `<html>` so portals follow them:
 The package is source-only: the app's own Vite compiles it. Two entry points.
 
 ```ts
-import { Button, usePalette } from 'ai-chat-kit'
-import { Composer, useChat, mountWidget } from 'ai-chat-kit/chat'
+import { Button, usePalette } from '@radixp0int/ai-chat-kit'
+import { Composer, useChat, mountWidget } from '@radixp0int/ai-chat-kit/chat'
 ```
 
 ```css
 @import 'tailwindcss';
-@import 'ai-chat-kit/brand/tokens.css';
-@import 'ai-chat-kit/styles.css';
-@import 'ai-chat-kit/chat.css';
+@import '@radixp0int/ai-chat-kit/brand/tokens.css';
+@import '@radixp0int/ai-chat-kit/styles.css';
+@import '@radixp0int/ai-chat-kit/chat.css';
 ```
 
 The widget brings its own stylesheet into its shadow root:
-`import cssText from 'ai-chat-kit/widget.css?inline'`.
+`import cssText from '@radixp0int/ai-chat-kit/widget.css?inline'`.
 
 Colours: see [Theming](?path=/docs/docs-theming--docs).
 

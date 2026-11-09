@@ -1,7 +1,7 @@
-// ai-chat-kit — the generic tiers: primitives, components, hooks, the
+// @radixp0int/ai-chat-kit — the generic tiers: primitives, components, hooks, the
 // settings plumbing and the palette API. Nothing here knows about chat, and
 // nothing here may import from it; chat builds on this, never the reverse. Its
-// own entry point is `ai-chat-kit/chat`.
+// own entry point is `@radixp0int/ai-chat-kit/chat`.
 
 // Primitives — one control or one visual atom each
 export * from './primitives/accordion'
