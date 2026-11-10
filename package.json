@@ -1,6 +1,6 @@
 {
   "name": "@radixp0int/ai-chat-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A chat UI kit: brand tokens with swappable palettes, primitives, the chat components and an embeddable chat widget. Source-only; the app's Vite compiles it.",
   "keywords": [
     "ai",
