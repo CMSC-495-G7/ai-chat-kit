@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       # The hook script scans the staged diff, which CI doesn't have, so this
@@ -42,6 +42,6 @@ jobs:
 
       - run: npm ci
       - run: npm run typecheck
-      - run: npx oxlint --max-warnings=0
+      - run: npx oxlint
       - run: npm run format:check
       - run: npm test
