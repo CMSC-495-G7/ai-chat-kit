@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react'
 export type IconTileProps = HTMLAttributes<HTMLSpanElement> & {
-  tone?: 'soft' | 'chip' | 'plain' | 'muted' | 'warning'
+  tone?: 'soft' | 'chip' | 'plain' | 'muted' | 'warning' | 'danger'
   size?: number
 }
