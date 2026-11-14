@@ -5,6 +5,7 @@ const tones = {
   plain: 'text-ink-soft',
   muted: 'rounded-control bg-tint/6 text-ink-soft',
   warning: 'rounded-control bg-caution-surface text-caution',
+  danger: 'rounded-control bg-danger/10 text-danger-fg',
 }
 export function IconTile({
   tone = 'soft',

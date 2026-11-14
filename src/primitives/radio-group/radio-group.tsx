@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import { RADIO_CLASS } from './radioClass'
 import type { RadioGroupItemProps, RadioGroupProps } from './types'
 
 type RadioContextValue = Pick<
@@ -61,16 +62,7 @@ export function RadioGroupItem({
       checked={controlled ? group.value === value : undefined}
       defaultChecked={!controlled ? group.defaultValue === value : undefined}
       disabled={group.disabled || disabled}
-      className={[
-        'size-[18px] shrink-0 cursor-pointer appearance-none rounded-full border-2 border-ink-soft/60 bg-panel-solid transition',
-        'hover:border-brand-fg/70 checked:border-[5px] checked:border-brand-solid',
-        'focus-visible:ring-3 focus-visible:ring-accent/20',
-        'disabled:cursor-not-allowed disabled:opacity-40',
-        'aria-invalid:border-danger aria-invalid:focus-visible:ring-danger/15',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      className={[RADIO_CLASS, className].filter(Boolean).join(' ')}
       onChange={(event) => {
         if (event.currentTarget.checked) group.onValueChange?.(value)
       }}
