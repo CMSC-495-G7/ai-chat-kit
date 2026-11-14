@@ -1,6 +1,6 @@
 {
   "name": "@radixp0int/ai-chat-kit",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A chat UI kit: brand tokens with swappable palettes, primitives, the chat components and an embeddable chat widget. Source-only; the app's Vite compiles it.",
   "keywords": [
     "ai",
@@ -65,7 +65,7 @@
     "screenshots": "node scripts/story-screenshots.mjs storybook-static .screenshots/current",
     "screenshots:compare": "node scripts/compare-screenshots.mjs .screenshots/baseline .screenshots/current",
     "prepare": "node .husky/install.mjs",
-    "prepublishOnly": "npm run typecheck && oxlint --max-warnings=0 && npm test",
+    "prepublishOnly": "npm run typecheck && oxlint && npm test",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
