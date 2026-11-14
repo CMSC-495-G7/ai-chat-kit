@@ -1,0 +1,72 @@
+import { Canvas, Meta } from '@storybook/addon-docs/blocks'
+import * as PagingStories from './paging.stories'
+
+<Meta of={PagingStories} />
+
+# Paging model
+
+`src/components/paging` — types and adapters, no UI. It is the contract
+between whatever backend serves rows and the `DataTable` + `Pagination` pair
+that shows them.
+
+## The one shape the UI speaks
+
+```ts
+type Page<T> = {
+  content: T[]
+  page: number // 1-based — what the query param and a person both use
+  size: number // rows requested per page
+  elements: number // rows actually on this page (the last is usually short)
+  offset: number // 1-based index of the first row, for "41–50 of 1,284"
+  first: boolean
+  last: boolean
+  totalElements: number
+  totalPages: number
+  sort: Sort[] // { field, direction: 'asc' | 'desc' }
+}
+
+type PageRequest = { page: number; size: number; sort: Sort[] } // page is 1-based
+type PageAdapter<TEnvelope = unknown> = <T>(envelope: TEnvelope) => Page<T>
+```
+
+## The page-number trap
+
+Our Django envelope is inconsistent with itself on purpose — it mirrors
+Spring’s `Pageable`, which counts pages from zero, while Django’s paginator
+counts from one:
+
+| Field              | Convention                |
+| ------------------ | ------------------------- |
+| `?page=` request   | 1-based                   |
+| `data.page.number` | **0-based**               |
+| `data.page.offset` | 1-based (`start_index()`) |
+
+Three conventions in one round trip. So `Page.page` is **1-based**, and the
+adapter is the single place the conversion happens. **If you find yourself
+writing `page - 1` in a component, the adapter is wrong.**
+
+## Shipped adapters
+
+| Adapter             | Backend                    | Notes                                                          |
+| ------------------- | -------------------------- | -------------------------------------------------------------- |
+| `djangoPageAdapter` | Our Django envelope        | Accepts the full `{ success, data }` envelope or bare `data`   |
+| `springPageAdapter` | Spring Data `Page`         | Zero-based `number`; offset computed from `number * size`      |
+| `plainPageAdapter`  | A flat Node service        | `items` / `results` / `data` / `content` all accepted for rows |
+| `staticPage`        | An array already in memory | For fixtures and demos                                         |
+
+`parseSort` accepts every sort shape these send — Django’s `sort_info`,
+Spring’s objects, a raw `name,asc` string — and turns anything unreadable into
+no sort rather than a thrown error. `formatSort` is its inverse, for the
+`sort=` query parameter. `first` / `last` are derived when absent rather than
+trusted.
+
+Not every field can be sorted by the backend. A column with a `sortKey` but
+`sortable: false` is not a button, and `toSortParam(sort, columns)` leaves it out
+of the request and returns `undefined` when nothing enabled is sorted, so the
+call is made with no `sort=` at all rather than one that fails. See the sorting
+section of the DataTable stories.
+
+Writing your own is one function: take your envelope, return a `Page`. The
+table never sees anything else.
+
+<Canvas of={PagingStories.AdapterExplorerStory} />

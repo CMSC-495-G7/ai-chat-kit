@@ -1,0 +1,32 @@
+import { DEFAULT_TABLE_LABELS } from '../data-table'
+import type { DataGridLabels } from './types'
+
+export const DEFAULT_GRID_LABELS: DataGridLabels = {
+  ...DEFAULT_TABLE_LABELS,
+  filters: 'Filters',
+  matches: 'Matches',
+  searchEvery: 'Search every field',
+  narrowToField: 'Narrow to a field',
+  dates: 'Dates',
+  values: 'Filters',
+  placeholder: 'Search, or pick a filter…',
+  placeholderMore: 'Add another filter…',
+  custom: 'Custom',
+  only: 'Show only',
+  quickHint: 'Type to find a value, or search',
+  searchFor: 'Search for',
+  contains: (field) => `${field} contains`,
+  inField: (field) => `in ${field}`,
+  removeFilter: (name) => `Remove ${name}`,
+  export: 'Export',
+  exportAs: (format) => `Export ${format}`,
+  exportRows: 'Rows',
+  exportSelected: 'Selected',
+  exportAll: 'All matching',
+  exportSelection: (n) => `Export ${n.toLocaleString()} row${n === 1 ? '' : 's'}`,
+  csvHint: 'Opens in Excel or Sheets',
+  jsonHint: 'For scripts and APIs',
+  noMatchTitle: 'Nothing matches',
+  noMatchBody: 'Remove a filter below, or clear them all.',
+  clearAll: 'Clear all filters',
+}

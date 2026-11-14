@@ -39,6 +39,34 @@ Import the stylesheets in this order, after Tailwind:
 @import '@radixp0int/ai-chat-kit/chat.css';
 ```
 
+### A list page: DataGrid
+
+`DataGrid` is a table with its search box, filter panel, selection, export and
+pagination. It holds no data: rows, filters, sort, page and selection are
+yours. See **Components/DataGrid** in Storybook for the four everyday setups.
+
+```tsx
+import { DataGrid, downloadRows, findMatches, termMatches } from '@radixp0int/ai-chat-kit'
+
+;<DataGrid
+  searchLabel="Search tenants"
+  caption="Tenants"
+  columns={columns}
+  rows={pageRows}
+  rowId={(t) => t.id}
+  fields={fields}
+  terms={terms}
+  onTermsChange={setTerms}
+  termFields={termFields}
+  findMatches={(q) => findMatches(q, allRows, termFields)}
+  selectedIds={selected}
+  onSelectionChange={setSelected}
+  exportFormats={['csv', 'json']}
+  onExport={(format) => downloadRows('tenants', format, filtered, exportColumns)}
+  pagination={{ page, size, totalElements, onPageChange: setPage, onSizeChange: setSize }}
+/>
+```
+
 Each sheet carries `@source` lines that point Tailwind at the kit's own files,
 so its utility classes are generated even though the package sits outside your
 app's root.

@@ -377,6 +377,21 @@ export const ArrowToTopIcon = (p: IconProps) => (
   </svg>
 )
 
+/** A tray: an inbox, or a list with nothing in it yet. */
+export const InboxIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4 13h4l1.5 3h5L16 13h4" />
+    <path d="M6 5h12l2 8v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5l2-8Z" />
+  </svg>
+)
+
+/** A file coming down: export, download. */
+export const DownloadIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+  </svg>
+)
+
 export const ArrowUpIcon = (p: IconProps) => (
   <svg {...base(p)}>
     <path d="M12 19V7M7.5 11.5 12 7l4.5 4.5" />
